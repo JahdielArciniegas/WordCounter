@@ -1,10 +1,10 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { ActiveWordsManager } from '../components/ActiveWordsManager';
 import { activeVocabService } from '../services/active.service';
 
 export const prerender = false;
 
-const initialData = activeVocabService.getActiveWords({ limit: 50, sort: 'occurrences_desc' });
 const stats = activeVocabService.getStats('es');
 ---
 
@@ -32,40 +32,7 @@ const stats = activeVocabService.getStats('es');
       </div>
     </div>
 
-    <!-- Interactive Island Container will mount ActiveWordsManager here in Phase 6 -->
-    <div id="active-manager-mount">
-      <div id="active-island-root">
-        <!-- Server rendered fallback table -->
-        <div class="border border-zinc-800 rounded-lg overflow-hidden bg-zinc-900/30">
-          <div class="p-4 border-b border-zinc-800 flex justify-between items-center text-xs text-zinc-400">
-            <span>Listado ordenado por frecuencia de uso (SSR)</span>
-            <span>Idioma: Español (es)</span>
-          </div>
-
-          <div class="divide-y divide-zinc-800/60 max-h-[500px] overflow-y-auto">
-            {initialData.items.length === 0 ? (
-              <div class="p-8 text-center text-sm text-zinc-500">
-                No hay palabras activas registradas todavía. Envía un texto para tokenizar y analizar.
-              </div>
-            ) : (
-              initialData.items.map((item) => (
-                <div class="p-3.5 flex items-center justify-between hover:bg-zinc-800/30 transition-colors">
-                  <div class="flex items-center space-x-3">
-                    <span class="font-medium text-sm text-zinc-200">{item.word}</span>
-                    <span class="px-2 py-0.5 rounded text-xs font-mono bg-emerald-950 text-emerald-300 border border-emerald-800/50">
-                      ×{item.occurrences}
-                    </span>
-                  </div>
-                  <div class="text-xs font-mono text-zinc-500 flex items-center space-x-4">
-                    <span>1° uso: {new Date(item.firstUsedAt).toLocaleDateString('es-ES')}</span>
-                    <span>Último: {new Date(item.lastUsedAt).toLocaleDateString('es-ES')}</span>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
+    <!-- Client Interactive Island -->
+    <ActiveWordsManager client:load />
   </div>
 </Layout>
