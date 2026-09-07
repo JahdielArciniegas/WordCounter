@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build & Dist
+dist/
+.astro/
+
+# SQLite Databases
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Environment & Logs
+.env
+.env.*
+!.env.example
+npm-debug.log*
+pnpm-debug.log*
+*.log
+.DS_Store
