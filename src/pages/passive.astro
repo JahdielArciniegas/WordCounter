@@ -1,0 +1,65 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { passiveVocabService } from '../services/passive.service';
+
+export const prerender = false;
+
+const initialData = passiveVocabService.getPassiveWords({ limit: 50 });
+---
+
+<Layout title="Vocabulario Pasivo — WordCounter">
+  <div class="space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800 pb-5">
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-100 flex items-center gap-2">
+          <span class="w-3 h-3 rounded-full bg-amber-400 inline-block"></span>
+          Vocabulario Pasivo
+        </h1>
+        <p class="text-zinc-400 text-sm mt-1">
+          Palabras reconocidas y comprendidas. Las importaciones son idempotentes (duplicados ignorados).
+        </p>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <span class="bg-zinc-900 border border-zinc-700/80 px-3 py-1.5 rounded-md text-xs font-mono text-zinc-300">
+          Total: <strong class="text-amber-400">{initialData.total}</strong> palabras
+        </span>
+      </div>
+    </div>
+
+    <!-- Interactive Island Container will mount PassiveWordsManager here in Phase 6 -->
+    <div id="passive-manager-mount">
+      <div id="passive-island-root" data-initial-total={initialData.total}>
+        <!-- Server rendered fallback table -->
+        <div class="border border-zinc-800 rounded-lg overflow-hidden bg-zinc-900/30">
+          <div class="p-4 border-b border-zinc-800 flex justify-between items-center text-xs text-zinc-400">
+            <span>Listado de reconocimiento inicial (SSR)</span>
+            <span>Idioma: Español (es)</span>
+          </div>
+
+          <div class="divide-y divide-zinc-800/60 max-h-[500px] overflow-y-auto">
+            {initialData.items.length === 0 ? (
+              <div class="p-8 text-center text-sm text-zinc-500">
+                No hay palabras pasivas registradas todavía. Puedes importar texto o un CSV.
+              </div>
+            ) : (
+              initialData.items.map((item) => (
+                <div class="p-3.5 flex items-center justify-between hover:bg-zinc-800/30 transition-colors">
+                  <span class="font-medium text-sm text-zinc-200">{item.word}</span>
+                  <span class="text-xs font-mono text-zinc-500">
+                    {new Date(item.addedAt).toLocaleDateString('es-ES', {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric',
+                    })}
+                  </span>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>
