@@ -1,8 +1,8 @@
-import { getDatabase } from '../db';
-import { passiveWords, type PassiveWord } from '../db/schema';
-import { parseWordsCsv } from './csv-parser';
-import { like, eq, and, desc, asc, sql } from 'drizzle-orm';
-import type Database from 'better-sqlite3';
+import { getDatabase } from "../db";
+import { passiveWords, type PassiveWord } from "../db/schema";
+import { parseWordsCsv } from "./csv-parser";
+import { like, eq, and, desc, asc, sql } from "drizzle-orm";
+import type Database from "better-sqlite3";
 
 export interface ImportSummary {
   totalProcessed: number;
@@ -15,7 +15,7 @@ export interface GetPassiveOptions {
   language?: string;
   limit?: number;
   offset?: number;
-  sort?: 'date_desc' | 'date_asc' | 'alpha';
+  sort?: "date_desc" | "date_asc" | "alpha";
 }
 
 export class PassiveVocabService {
@@ -30,12 +30,12 @@ export class PassiveVocabService {
    */
   importFromText(
     text: string,
-    language: string = 'es',
-    conn?: { db: any; sqlite: Database.Database }
+    language: string = "es",
+    conn?: { db: any; sqlite: Database.Database },
   ): ImportSummary {
     const { sqlite } = this.getDb(conn);
 
-    if (!text || typeof text !== 'string') {
+    if (!text || typeof text !== "string") {
       return { totalProcessed: 0, insertedCount: 0, skippedCount: 0 };
     }
 
@@ -78,8 +78,8 @@ export class PassiveVocabService {
    */
   importFromCsv(
     csvContent: string,
-    language: string = 'es',
-    conn?: { db: any; sqlite: Database.Database }
+    language: string = "es",
+    conn?: { db: any; sqlite: Database.Database },
   ): ImportSummary {
     const { sqlite } = this.getDb(conn);
     const parsed = parseWordsCsv(csvContent);
@@ -128,31 +128,33 @@ export class PassiveVocabService {
    */
   getPassiveWords(
     options: GetPassiveOptions = {},
-    conn?: { db: any; sqlite: Database.Database }
+    conn?: { db: any; sqlite: Database.Database },
   ): { items: PassiveWord[]; total: number } {
     const { db } = this.getDb(conn);
-    const language = options.language || 'es';
+    const language = options.language || "es";
     const limit = options.limit || 50;
     const offset = options.offset || 0;
-    const sort = options.sort || 'date_desc';
+    const sort = options.sort || "date_desc";
 
     const conditions = [eq(passiveWords.language, language)];
 
     if (options.query && options.query.trim()) {
-      conditions.push(like(passiveWords.word, `%${options.query.trim().toLowerCase()}%`));
+      conditions.push(
+        like(passiveWords.word, `%${options.query.trim().toLowerCase()}%`),
+      );
     }
 
     const whereClause = and(...conditions);
 
     let orderBy;
     switch (sort) {
-      case 'date_asc':
+      case "date_asc":
         orderBy = asc(passiveWords.addedAt);
         break;
-      case 'alpha':
+      case "alpha":
         orderBy = asc(passiveWords.word);
         break;
-      case 'date_desc':
+      case "date_desc":
       default:
         orderBy = desc(passiveWords.addedAt);
         break;
@@ -177,6 +179,11 @@ export class PassiveVocabService {
       items,
       total: countResult ? Number(countResult.count) : 0,
     };
+  }
+
+  removeWord(id: number, conn?: { db: any; sqlite: Database.Database }): void {
+    const { db } = this.getDb(conn);
+    db.delete(passiveWords).where(eq(passiveWords.id, id)).run();
   }
 }
 

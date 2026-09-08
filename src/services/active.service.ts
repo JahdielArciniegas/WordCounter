@@ -1,8 +1,8 @@
-import { getDatabase } from '../db';
-import { activeWords, passiveWords, type ActiveWord } from '../db/schema';
-import { tokenizeText, type TokenFrequency } from './tokenizer';
-import { like, eq, and, desc, asc, sql } from 'drizzle-orm';
-import type Database from 'better-sqlite3';
+import { getDatabase } from "../db";
+import { activeWords, passiveWords, type ActiveWord } from "../db/schema";
+import { tokenizeText, type TokenFrequency } from "./tokenizer";
+import { like, eq, and, desc, asc, sql } from "drizzle-orm";
+import type Database from "better-sqlite3";
 
 export interface ActiveAnalysisSummary {
   tokensAnalyzed: number;
@@ -17,7 +17,7 @@ export interface GetActiveOptions {
   language?: string;
   limit?: number;
   offset?: number;
-  sort?: 'occurrences_desc' | 'date_desc' | 'alpha';
+  sort?: "occurrences_desc" | "date_desc" | "alpha";
 }
 
 export interface OverallStats {
@@ -39,8 +39,8 @@ export class ActiveVocabService {
    */
   analyzeAndIngestText(
     text: string,
-    language: string = 'es',
-    conn?: { db: any; sqlite: Database.Database }
+    language: string = "es",
+    conn?: { db: any; sqlite: Database.Database },
   ): ActiveAnalysisSummary {
     const { sqlite } = this.getDb(conn);
 
@@ -70,17 +70,19 @@ export class ActiveVocabService {
     let newCount = 0;
     let updatedCount = 0;
 
-    const runTransaction = sqlite.transaction((frequencies: TokenFrequency[]) => {
-      for (const item of frequencies) {
-        const exists = checkStmt.get(item.word, language);
-        if (exists) {
-          updatedCount++;
-        } else {
-          newCount++;
+    const runTransaction = sqlite.transaction(
+      (frequencies: TokenFrequency[]) => {
+        for (const item of frequencies) {
+          const exists = checkStmt.get(item.word, language);
+          if (exists) {
+            updatedCount++;
+          } else {
+            newCount++;
+          }
+          upsertStmt.run(item.word, language, item.count);
         }
-        upsertStmt.run(item.word, language, item.count);
-      }
-    });
+      },
+    );
 
     runTransaction(tokenized.frequencies);
 
@@ -98,31 +100,33 @@ export class ActiveVocabService {
    */
   getActiveWords(
     options: GetActiveOptions = {},
-    conn?: { db: any; sqlite: Database.Database }
+    conn?: { db: any; sqlite: Database.Database },
   ): { items: ActiveWord[]; total: number } {
     const { db } = this.getDb(conn);
-    const language = options.language || 'es';
+    const language = options.language || "es";
     const limit = options.limit || 50;
     const offset = options.offset || 0;
-    const sort = options.sort || 'occurrences_desc';
+    const sort = options.sort || "occurrences_desc";
 
     const conditions = [eq(activeWords.language, language)];
 
     if (options.query && options.query.trim()) {
-      conditions.push(like(activeWords.word, `%${options.query.trim().toLowerCase()}%`));
+      conditions.push(
+        like(activeWords.word, `%${options.query.trim().toLowerCase()}%`),
+      );
     }
 
     const whereClause = and(...conditions);
 
     let orderBy;
     switch (sort) {
-      case 'date_desc':
+      case "date_desc":
         orderBy = desc(activeWords.lastUsedAt);
         break;
-      case 'alpha':
+      case "alpha":
         orderBy = asc(activeWords.word);
         break;
-      case 'occurrences_desc':
+      case "occurrences_desc":
       default:
         orderBy = desc(activeWords.occurrences);
         break;
@@ -153,8 +157,8 @@ export class ActiveVocabService {
    * Get global counts and stats for active vs passive vocabulary.
    */
   getStats(
-    language: string = 'es',
-    conn?: { db: any; sqlite: Database.Database }
+    language: string = "es",
+    conn?: { db: any; sqlite: Database.Database },
   ): OverallStats {
     const { db } = this.getDb(conn);
 
@@ -176,8 +180,15 @@ export class ActiveVocabService {
     return {
       passiveCount: passiveRes ? Number(passiveRes.count) : 0,
       activeCount: activeRes ? Number(activeRes.count) : 0,
-      totalActiveOccurrences: activeRes ? Number(activeRes.totalOccurrences) : 0,
+      totalActiveOccurrences: activeRes
+        ? Number(activeRes.totalOccurrences)
+        : 0,
     };
+  }
+
+  removeWord(id: number, conn?: { db: any; sqlite: Database.Database }): void {
+    const { db } = this.getDb(conn);
+    db.delete(activeWords).where(eq(activeWords.id, id)).run();
   }
 }
 
