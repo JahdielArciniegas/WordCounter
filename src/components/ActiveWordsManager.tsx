@@ -1,5 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { Send, Search, Sparkles, RefreshCw, BarChart2, Calendar, CheckCircle2, AlertCircle } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import {
+  Send,
+  Search,
+  Sparkles,
+  RefreshCw,
+  BarChart2,
+  Calendar,
+  CheckCircle2,
+  AlertCircle,
+  Trash2,
+} from "lucide-react";
 
 interface ActiveWord {
   id: number;
@@ -22,22 +32,26 @@ export const ActiveWordsManager: React.FC = () => {
   const [words, setWords] = useState<ActiveWord[]>([]);
   const [total, setTotal] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
-  const [searchQuery, setSearchQuery] = useState<string>('');
-  const [sortBy, setSortBy] = useState<'occurrences_desc' | 'date_desc' | 'alpha'>('occurrences_desc');
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [sortBy, setSortBy] = useState<
+    "occurrences_desc" | "date_desc" | "alpha"
+  >("occurrences_desc");
 
   // Input & Analysis State
-  const [textInput, setTextInput] = useState<string>('');
+  const [textInput, setTextInput] = useState<string>("");
   const [submitting, setSubmitting] = useState<boolean>(false);
-  const [analysisResult, setAnalysisResult] = useState<AnalysisSummary | null>(null);
+  const [analysisResult, setAnalysisResult] = useState<AnalysisSummary | null>(
+    null,
+  );
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const fetchWords = async (q: string = searchQuery, sort: string = sortBy) => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
-      if (q.trim()) params.append('q', q.trim());
-      params.append('sort', sort);
-      params.append('limit', '100');
+      if (q.trim()) params.append("q", q.trim());
+      params.append("sort", sort);
+      params.append("limit", "100");
 
       const res = await fetch(`/api/active/words?${params.toString()}`);
       if (res.ok) {
@@ -46,7 +60,23 @@ export const ActiveWordsManager: React.FC = () => {
         setTotal(data.total);
       }
     } catch (err) {
-      console.error('Error al cargar palabras activas:', err);
+      console.error("Error al cargar palabras activas:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteWord = async (id: number) => {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/active/words/${id}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        fetchWords();
+      }
+    } catch (err) {
+      console.error("Error al eliminar palabra:", err);
     } finally {
       setLoading(false);
     }
@@ -71,10 +101,10 @@ export const ActiveWordsManager: React.FC = () => {
     setErrorMsg(null);
 
     try {
-      const res = await fetch('/api/active/analyze-text', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: textInput, language: 'es' }),
+      const res = await fetch("/api/active/analyze-text", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: textInput, language: "es" }),
       });
 
       const data = await res.json();
@@ -86,13 +116,13 @@ export const ActiveWordsManager: React.FC = () => {
           updatedWordsCount: data.updatedWordsCount,
           topWords: data.topWords || [],
         });
-        setTextInput(''); // Discard raw text immediately
+        setTextInput(""); // Discard raw text immediately
         fetchWords();
       } else {
-        setErrorMsg(data.error || 'Error al analizar el texto.');
+        setErrorMsg(data.error || "Error al analizar el texto.");
       }
     } catch (err: any) {
-      setErrorMsg(err.message || 'Error de conexión con el servidor.');
+      setErrorMsg(err.message || "Error de conexión con el servidor.");
     } finally {
       setSubmitting(false);
     }
@@ -123,7 +153,9 @@ export const ActiveWordsManager: React.FC = () => {
 
           <div className="flex items-center justify-between">
             <span className="text-xs text-zinc-500">
-              {textInput.length > 0 ? `${textInput.trim().split(/\s+/).length} palabras aproximadas` : ''}
+              {textInput.length > 0
+                ? `${textInput.trim().split(/\s+/).length} palabras aproximadas`
+                : ""}
             </span>
 
             <button
@@ -136,7 +168,9 @@ export const ActiveWordsManager: React.FC = () => {
               ) : (
                 <Send className="w-4 h-4" />
               )}
-              <span>{submitting ? 'Tokenizando...' : 'Analizar y Acumular'}</span>
+              <span>
+                {submitting ? "Tokenizando..." : "Analizar y Acumular"}
+              </span>
             </button>
           </div>
         </form>
@@ -168,32 +202,43 @@ export const ActiveWordsManager: React.FC = () => {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
               <div className="bg-zinc-900/60 p-2.5 rounded border border-zinc-800/80">
                 <div className="text-xs text-zinc-400">Tokens Totales</div>
-                <div className="text-lg font-bold text-zinc-100">{analysisResult.tokensAnalyzed}</div>
+                <div className="text-lg font-bold text-zinc-100">
+                  {analysisResult.tokensAnalyzed}
+                </div>
               </div>
               <div className="bg-zinc-900/60 p-2.5 rounded border border-zinc-800/80">
                 <div className="text-xs text-zinc-400">Palabras Únicas</div>
-                <div className="text-lg font-bold text-zinc-100">{analysisResult.uniqueWords}</div>
+                <div className="text-lg font-bold text-zinc-100">
+                  {analysisResult.uniqueWords}
+                </div>
               </div>
               <div className="bg-zinc-900/60 p-2.5 rounded border border-zinc-800/80">
                 <div className="text-xs text-emerald-400">Nuevas Palabras</div>
-                <div className="text-lg font-bold text-emerald-300">+{analysisResult.newWordsCount}</div>
+                <div className="text-lg font-bold text-emerald-300">
+                  +{analysisResult.newWordsCount}
+                </div>
               </div>
               <div className="bg-zinc-900/60 p-2.5 rounded border border-zinc-800/80">
                 <div className="text-xs text-indigo-400">Actualizadas</div>
-                <div className="text-lg font-bold text-indigo-300">{analysisResult.updatedWordsCount}</div>
+                <div className="text-lg font-bold text-indigo-300">
+                  {analysisResult.updatedWordsCount}
+                </div>
               </div>
             </div>
 
             {analysisResult.topWords.length > 0 && (
               <div className="pt-1">
-                <span className="text-xs text-zinc-400 font-medium mr-2">Top palabras en este texto:</span>
+                <span className="text-xs text-zinc-400 font-medium mr-2">
+                  Top palabras en este texto:
+                </span>
                 <div className="inline-flex flex-wrap gap-1.5 mt-1">
                   {analysisResult.topWords.map((t) => (
                     <span
                       key={t.word}
                       className="px-2 py-0.5 rounded bg-zinc-900 text-zinc-300 border border-zinc-700/60 text-xs font-mono"
                     >
-                      {t.word} <strong className="text-emerald-400">({t.count})</strong>
+                      {t.word}{" "}
+                      <strong className="text-emerald-400">({t.count})</strong>
                     </span>
                   ))}
                 </div>
@@ -221,31 +266,31 @@ export const ActiveWordsManager: React.FC = () => {
           {/* Sort Controls */}
           <div className="flex items-center bg-zinc-900 border border-zinc-800 rounded-lg p-1 text-xs">
             <button
-              onClick={() => setSortBy('occurrences_desc')}
+              onClick={() => setSortBy("occurrences_desc")}
               className={`px-3 py-1 rounded transition-colors ${
-                sortBy === 'occurrences_desc'
-                  ? 'bg-zinc-800 text-emerald-300 font-medium'
-                  : 'text-zinc-400 hover:text-zinc-200'
+                sortBy === "occurrences_desc"
+                  ? "bg-zinc-800 text-emerald-300 font-medium"
+                  : "text-zinc-400 hover:text-zinc-200"
               }`}
             >
               Frecuencia
             </button>
             <button
-              onClick={() => setSortBy('date_desc')}
+              onClick={() => setSortBy("date_desc")}
               className={`px-3 py-1 rounded transition-colors ${
-                sortBy === 'date_desc'
-                  ? 'bg-zinc-800 text-emerald-300 font-medium'
-                  : 'text-zinc-400 hover:text-zinc-200'
+                sortBy === "date_desc"
+                  ? "bg-zinc-800 text-emerald-300 font-medium"
+                  : "text-zinc-400 hover:text-zinc-200"
               }`}
             >
               Último uso
             </button>
             <button
-              onClick={() => setSortBy('alpha')}
+              onClick={() => setSortBy("alpha")}
               className={`px-3 py-1 rounded transition-colors ${
-                sortBy === 'alpha'
-                  ? 'bg-zinc-800 text-emerald-300 font-medium'
-                  : 'text-zinc-400 hover:text-zinc-200'
+                sortBy === "alpha"
+                  ? "bg-zinc-800 text-emerald-300 font-medium"
+                  : "text-zinc-400 hover:text-zinc-200"
               }`}
             >
               A - Z
@@ -264,12 +309,16 @@ export const ActiveWordsManager: React.FC = () => {
             )}
           </div>
 
-          <div className="divide-y divide-zinc-800/60 max-h-[550px] overflow-y-auto">
+          <div className="divide-y divide-zinc-800/60 max-h-137.5 overflow-y-auto">
             {words.length === 0 ? (
               <div className="p-12 text-center">
-                <p className="text-zinc-400 text-sm font-medium">No se encontraron palabras activas</p>
+                <p className="text-zinc-400 text-sm font-medium">
+                  No se encontraron palabras activas
+                </p>
                 <p className="text-zinc-600 text-xs mt-1">
-                  {searchQuery ? 'Prueba con otro término de búsqueda.' : 'Ingesta tu primer texto arriba para comenzar.'}
+                  {searchQuery
+                    ? "Prueba con otro término de búsqueda."
+                    : "Ingesta tu primer texto arriba para comenzar."}
                 </p>
               </div>
             ) : (
@@ -279,18 +328,25 @@ export const ActiveWordsManager: React.FC = () => {
                   className="p-3.5 px-5 flex items-center justify-between hover:bg-zinc-800/20 transition-colors"
                 >
                   <div className="flex items-center space-x-3">
-                    <span className="font-medium text-sm text-zinc-200">{item.word}</span>
+                    <span className="font-medium text-sm text-zinc-200">
+                      {item.word}
+                    </span>
                     <span className="px-2.5 py-0.5 rounded-full text-xs font-mono bg-emerald-950 text-emerald-300 border border-emerald-800/60 font-semibold">
                       ×{item.occurrences}
                     </span>
+                    <button onClick={() => handleDeleteWord(item.id)}>
+                      <Trash2 className="w-3 h-3 text-zinc-400 hover:text-red-400" />
+                    </button>
                   </div>
 
                   <div className="text-xs font-mono text-zinc-500 flex items-center space-x-4">
                     <span className="hidden sm:inline">
-                      1° uso: {new Date(item.firstUsedAt).toLocaleDateString('es-ES')}
+                      1° uso:{" "}
+                      {new Date(item.firstUsedAt).toLocaleDateString("es-ES")}
                     </span>
                     <span>
-                      Último: {new Date(item.lastUsedAt).toLocaleDateString('es-ES')}
+                      Último:{" "}
+                      {new Date(item.lastUsedAt).toLocaleDateString("es-ES")}
                     </span>
                   </div>
                 </div>

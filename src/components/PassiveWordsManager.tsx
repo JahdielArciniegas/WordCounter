@@ -1,5 +1,15 @@
-import React, { useState, useEffect, useTransition } from 'react';
-import { Upload, FileText, Search, CheckCircle2, AlertCircle, RefreshCw, X, Filter } from 'lucide-react';
+import React, { useState, useEffect, useTransition } from "react";
+import {
+  Upload,
+  FileText,
+  Search,
+  CheckCircle2,
+  AlertCircle,
+  RefreshCw,
+  X,
+  Filter,
+  Trash2,
+} from "lucide-react";
 
 interface PassiveWord {
   id: number;
@@ -12,21 +22,25 @@ interface PassiveWordsManagerProps {
   initialTotal?: number;
 }
 
-export const PassiveWordsManager: React.FC<PassiveWordsManagerProps> = ({ initialTotal = 0 }) => {
+export const PassiveWordsManager: React.FC<PassiveWordsManagerProps> = ({
+  initialTotal = 0,
+}) => {
   const [words, setWords] = useState<PassiveWord[]>([]);
   const [total, setTotal] = useState<number>(initialTotal);
   const [loading, setLoading] = useState<boolean>(true);
-  const [searchQuery, setSearchQuery] = useState<string>('');
-  const [sortBy, setSortBy] = useState<'date_desc' | 'date_asc' | 'alpha'>('date_desc');
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [sortBy, setSortBy] = useState<"date_desc" | "date_asc" | "alpha">(
+    "date_desc",
+  );
 
   // Import Modal State
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<'text' | 'csv'>('text');
-  const [textInput, setTextInput] = useState<string>('');
+  const [activeTab, setActiveTab] = useState<"text" | "csv">("text");
+  const [textInput, setTextInput] = useState<string>("");
   const [csvFile, setCsvFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [feedback, setFeedback] = useState<{
-    type: 'success' | 'error';
+    type: "success" | "error";
     message: string;
     inserted?: number;
     skipped?: number;
@@ -36,9 +50,9 @@ export const PassiveWordsManager: React.FC<PassiveWordsManagerProps> = ({ initia
     setLoading(true);
     try {
       const params = new URLSearchParams();
-      if (q.trim()) params.append('q', q.trim());
-      params.append('sort', sort);
-      params.append('limit', '100');
+      if (q.trim()) params.append("q", q.trim());
+      params.append("sort", sort);
+      params.append("limit", "100");
 
       const res = await fetch(`/api/passive/words?${params.toString()}`);
       if (res.ok) {
@@ -47,7 +61,23 @@ export const PassiveWordsManager: React.FC<PassiveWordsManagerProps> = ({ initia
         setTotal(data.total);
       }
     } catch (err) {
-      console.error('Error al cargar palabras pasivas:', err);
+      console.error("Error al cargar palabras pasivas:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteWord = async (id: number) => {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/passive/words/${id}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        fetchWords();
+      }
+    } catch (err) {
+      console.error("Error al eliminar palabra:", err);
     } finally {
       setLoading(false);
     }
@@ -73,30 +103,33 @@ export const PassiveWordsManager: React.FC<PassiveWordsManagerProps> = ({ initia
     setFeedback(null);
 
     try {
-      const res = await fetch('/api/passive/import-text', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: textInput, language: 'es' }),
+      const res = await fetch("/api/passive/import-text", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: textInput, language: "es" }),
       });
 
       const data = await res.json();
       if (res.ok && data.success) {
         setFeedback({
-          type: 'success',
+          type: "success",
           message: `Importación completada: ${data.insertedCount} agregadas, ${data.skippedCount} omitidas (duplicadas).`,
           inserted: data.insertedCount,
           skipped: data.skippedCount,
         });
-        setTextInput('');
+        setTextInput("");
         fetchWords();
       } else {
         setFeedback({
-          type: 'error',
-          message: data.error || 'Error al procesar el texto.',
+          type: "error",
+          message: data.error || "Error al procesar el texto.",
         });
       }
     } catch (err: any) {
-      setFeedback({ type: 'error', message: err.message || 'Error de conexión.' });
+      setFeedback({
+        type: "error",
+        message: err.message || "Error de conexión.",
+      });
     } finally {
       setSubmitting(false);
     }
@@ -111,18 +144,18 @@ export const PassiveWordsManager: React.FC<PassiveWordsManagerProps> = ({ initia
 
     try {
       const formData = new FormData();
-      formData.append('file', csvFile);
-      formData.append('language', 'es');
+      formData.append("file", csvFile);
+      formData.append("language", "es");
 
-      const res = await fetch('/api/passive/import-csv', {
-        method: 'POST',
+      const res = await fetch("/api/passive/import-csv", {
+        method: "POST",
         body: formData,
       });
 
       const data = await res.json();
       if (res.ok && data.success) {
         setFeedback({
-          type: 'success',
+          type: "success",
           message: `CSV importado: ${data.insertedCount} agregadas, ${data.skippedCount} omitidas.`,
           inserted: data.insertedCount,
           skipped: data.skippedCount,
@@ -131,12 +164,15 @@ export const PassiveWordsManager: React.FC<PassiveWordsManagerProps> = ({ initia
         fetchWords();
       } else {
         setFeedback({
-          type: 'error',
-          message: data.error || 'Error al importar el archivo CSV.',
+          type: "error",
+          message: data.error || "Error al importar el archivo CSV.",
         });
       }
     } catch (err: any) {
-      setFeedback({ type: 'error', message: err.message || 'Error al subir el archivo.' });
+      setFeedback({
+        type: "error",
+        message: err.message || "Error al subir el archivo.",
+      });
     } finally {
       setSubmitting(false);
     }
@@ -162,17 +198,21 @@ export const PassiveWordsManager: React.FC<PassiveWordsManagerProps> = ({ initia
         <div className="flex items-center gap-3">
           <div className="flex items-center bg-zinc-900 border border-zinc-800 rounded-lg p-1 text-xs">
             <button
-              onClick={() => setSortBy('date_desc')}
+              onClick={() => setSortBy("date_desc")}
               className={`px-2.5 py-1 rounded transition-colors ${
-                sortBy === 'date_desc' ? 'bg-zinc-800 text-amber-300 font-medium' : 'text-zinc-400 hover:text-zinc-200'
+                sortBy === "date_desc"
+                  ? "bg-zinc-800 text-amber-300 font-medium"
+                  : "text-zinc-400 hover:text-zinc-200"
               }`}
             >
               Más recientes
             </button>
             <button
-              onClick={() => setSortBy('alpha')}
+              onClick={() => setSortBy("alpha")}
               className={`px-2.5 py-1 rounded transition-colors ${
-                sortBy === 'alpha' ? 'bg-zinc-800 text-amber-300 font-medium' : 'text-zinc-400 hover:text-zinc-200'
+                sortBy === "alpha"
+                  ? "bg-zinc-800 text-amber-300 font-medium"
+                  : "text-zinc-400 hover:text-zinc-200"
               }`}
             >
               A - Z
@@ -203,12 +243,16 @@ export const PassiveWordsManager: React.FC<PassiveWordsManagerProps> = ({ initia
           )}
         </div>
 
-        <div className="divide-y divide-zinc-800/60 max-h-[550px] overflow-y-auto">
+        <div className="divide-y divide-zinc-800/60 max-h-137.5 overflow-y-auto">
           {words.length === 0 ? (
             <div className="p-12 text-center">
-              <p className="text-zinc-400 text-sm font-medium">No se encontraron palabras pasivas</p>
+              <p className="text-zinc-400 text-sm font-medium">
+                No se encontraron palabras pasivas
+              </p>
               <p className="text-zinc-600 text-xs mt-1">
-                {searchQuery ? 'Prueba con otro término de búsqueda.' : 'Haz clic en "Importar Palabras" para comenzar.'}
+                {searchQuery
+                  ? "Prueba con otro término de búsqueda."
+                  : 'Haz clic en "Importar Palabras" para comenzar.'}
               </p>
             </div>
           ) : (
@@ -217,14 +261,19 @@ export const PassiveWordsManager: React.FC<PassiveWordsManagerProps> = ({ initia
                 key={item.id}
                 className="p-3.5 px-5 flex items-center justify-between hover:bg-zinc-800/20 transition-colors"
               >
-                <span className="font-medium text-sm text-zinc-200">{item.word}</span>
+                <span className="font-medium text-sm text-zinc-200">
+                  {item.word}
+                </span>
                 <span className="text-xs font-mono text-zinc-500">
-                  {new Date(item.addedAt).toLocaleDateString('es-ES', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
+                  {new Date(item.addedAt).toLocaleDateString("es-ES", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
                   })}
                 </span>
+                <button onClick={() => handleDeleteWord(item.id)}>
+                  <Trash2 className="w-3 h-3 text-zinc-400 hover:text-red-400" />
+                </button>
               </div>
             ))
           )}
@@ -252,26 +301,26 @@ export const PassiveWordsManager: React.FC<PassiveWordsManagerProps> = ({ initia
             <div className="flex border-b border-zinc-800 text-sm">
               <button
                 onClick={() => {
-                  setActiveTab('text');
+                  setActiveTab("text");
                   setFeedback(null);
                 }}
                 className={`flex-1 pb-2.5 font-medium border-b-2 text-center transition-colors ${
-                  activeTab === 'text'
-                    ? 'border-amber-400 text-amber-300'
-                    : 'border-transparent text-zinc-400 hover:text-zinc-200'
+                  activeTab === "text"
+                    ? "border-amber-400 text-amber-300"
+                    : "border-transparent text-zinc-400 hover:text-zinc-200"
                 }`}
               >
                 Texto Multilínea
               </button>
               <button
                 onClick={() => {
-                  setActiveTab('csv');
+                  setActiveTab("csv");
                   setFeedback(null);
                 }}
                 className={`flex-1 pb-2.5 font-medium border-b-2 text-center transition-colors ${
-                  activeTab === 'csv'
-                    ? 'border-amber-400 text-amber-300'
-                    : 'border-transparent text-zinc-400 hover:text-zinc-200'
+                  activeTab === "csv"
+                    ? "border-amber-400 text-amber-300"
+                    : "border-transparent text-zinc-400 hover:text-zinc-200"
                 }`}
               >
                 Archivo CSV
@@ -282,12 +331,12 @@ export const PassiveWordsManager: React.FC<PassiveWordsManagerProps> = ({ initia
             {feedback && (
               <div
                 className={`p-3 rounded-lg text-xs flex items-start space-x-2 border ${
-                  feedback.type === 'success'
-                    ? 'bg-emerald-950/40 border-emerald-800/60 text-emerald-300'
-                    : 'bg-red-950/40 border-red-800/60 text-red-300'
+                  feedback.type === "success"
+                    ? "bg-emerald-950/40 border-emerald-800/60 text-emerald-300"
+                    : "bg-red-950/40 border-red-800/60 text-red-300"
                 }`}
               >
-                {feedback.type === 'success' ? (
+                {feedback.type === "success" ? (
                   <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0" />
                 ) : (
                   <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
@@ -297,7 +346,7 @@ export const PassiveWordsManager: React.FC<PassiveWordsManagerProps> = ({ initia
             )}
 
             {/* Tab 1: Multiline Text */}
-            {activeTab === 'text' && (
+            {activeTab === "text" && (
               <form onSubmit={handleTextImport} className="space-y-4">
                 <div>
                   <label className="block text-xs text-zinc-400 mb-1.5 font-medium">
@@ -311,7 +360,8 @@ export const PassiveWordsManager: React.FC<PassiveWordsManagerProps> = ({ initia
                     className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-amber-500/60 focus:ring-1 focus:ring-amber-500/60 font-mono"
                   />
                   <p className="text-xs text-zinc-500 mt-1">
-                    No incluyas traducción. La fecha registrada será hoy. Los duplicados se ignoran.
+                    No incluyas traducción. La fecha registrada será hoy. Los
+                    duplicados se ignoran.
                   </p>
                 </div>
 
@@ -328,15 +378,19 @@ export const PassiveWordsManager: React.FC<PassiveWordsManagerProps> = ({ initia
                     disabled={submitting || !textInput.trim()}
                     className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-zinc-950 font-medium px-4 py-2 rounded-lg text-xs transition-colors"
                   >
-                    {submitting && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
-                    <span>{submitting ? 'Procesando...' : 'Importar Lista'}</span>
+                    {submitting && (
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    )}
+                    <span>
+                      {submitting ? "Procesando..." : "Importar Lista"}
+                    </span>
                   </button>
                 </div>
               </form>
             )}
 
             {/* Tab 2: CSV Upload */}
-            {activeTab === 'csv' && (
+            {activeTab === "csv" && (
               <form onSubmit={handleCsvImport} className="space-y-4">
                 <div>
                   <label className="block text-xs text-zinc-400 mb-1.5 font-medium">
@@ -349,7 +403,9 @@ export const PassiveWordsManager: React.FC<PassiveWordsManagerProps> = ({ initia
                     className="w-full text-xs text-zinc-400 file:mr-3 file:py-2 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-zinc-800 file:text-zinc-200 hover:file:bg-zinc-700 cursor-pointer bg-zinc-950 border border-zinc-800 p-2 rounded-lg"
                   />
                   <p className="text-xs text-zinc-500 mt-1">
-                    Formato compatible: encabezado "word,date" o simplemente una columna con palabras. Si incluye columna de fecha, se preservará.
+                    Formato compatible: encabezado "word,date" o simplemente una
+                    columna con palabras. Si incluye columna de fecha, se
+                    preservará.
                   </p>
                 </div>
 
@@ -366,8 +422,12 @@ export const PassiveWordsManager: React.FC<PassiveWordsManagerProps> = ({ initia
                     disabled={submitting || !csvFile}
                     className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-zinc-950 font-medium px-4 py-2 rounded-lg text-xs transition-colors"
                   >
-                    {submitting && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
-                    <span>{submitting ? 'Subiendo...' : 'Subir e Importar'}</span>
+                    {submitting && (
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    )}
+                    <span>
+                      {submitting ? "Subiendo..." : "Subir e Importar"}
+                    </span>
                   </button>
                 </div>
               </form>
