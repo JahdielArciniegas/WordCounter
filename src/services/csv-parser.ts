@@ -8,7 +8,7 @@ export interface ParsedCsvWord {
  * Supports headers like "word,date" or single-column lists.
  */
 export function parseWordsCsv(csvContent: string): ParsedCsvWord[] {
-  if (!csvContent || typeof csvContent !== 'string') return [];
+  if (!csvContent || typeof csvContent !== "string") return [];
 
   const lines = csvContent
     .split(/\r?\n/)
@@ -23,18 +23,38 @@ export function parseWordsCsv(csvContent: string): ParsedCsvWord[] {
   let startIndex = 0;
 
   // Check if first row is a header
-  const firstRowCols = lines[0].split(',').map((c) => c.trim().toLowerCase().replace(/['"]/g, ''));
+  const firstRowCols = lines[0]
+    .split(",")
+    .map((c) => c.trim().toLowerCase().replace(/['"]/g, ""));
   const hasHeader = firstRowCols.some((c) =>
-    ['word', 'palabra', 'vocab', 'term', 'date', 'fecha', 'added_at', 'created_at'].includes(c)
+    [
+      "word",
+      "palabra",
+      "vocab",
+      "term",
+      "date",
+      "fecha",
+      "added_at",
+      "created_at",
+    ].includes(c),
   );
 
   if (hasHeader) {
     startIndex = 1;
-    const foundWordIdx = firstRowCols.findIndex((c) => ['word', 'palabra', 'vocab', 'term'].includes(c));
+    const foundWordIdx = firstRowCols.findIndex((c) =>
+      ["word", "palabra", "vocab", "term"].includes(c),
+    );
     if (foundWordIdx !== -1) wordColIdx = foundWordIdx;
 
     const foundDateIdx = firstRowCols.findIndex((c) =>
-      ['date', 'fecha', 'added_at', 'created_at', 'timestamp'].includes(c)
+      [
+        "date",
+        "fecha",
+        "added_at",
+        "added",
+        "created_at",
+        "timestamp",
+      ].includes(c),
     );
     if (foundDateIdx !== -1) dateColIdx = foundDateIdx;
   }
@@ -42,7 +62,9 @@ export function parseWordsCsv(csvContent: string): ParsedCsvWord[] {
   for (let i = startIndex; i < lines.length; i++) {
     const rawLine = lines[i];
     // Split by comma ignoring commas enclosed in quotes
-    const cols = rawLine.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map((c) => c.trim().replace(/^"|"$/g, ''));
+    const cols = rawLine
+      .split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
+      .map((c) => c.trim().replace(/^"|"$/g, ""));
 
     const rawWord = cols[wordColIdx]?.trim().toLowerCase();
     if (!rawWord) continue;
