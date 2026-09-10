@@ -155,5 +155,83 @@ describe('Core Domain Services (Phase 3)', () => {
       expect(search.total).toBe(2);
       expect(search.items.map((i) => i.word).sort()).toEqual(['computación', 'computadora']);
     });
+
+    it('should maintain bidirectional temporal boundaries (first_used_at and last_used_at) on historical text ingestion', () => {
+      // 1. Initial ingestion with baseline date: 2024-06-01
+      const initialDate = '2024-06-01T12:00:00Z';
+      activeService.analyzeAndIngestText('resiliencia', 'es', initialDate, conn);
+
+      let items = activeService.getActiveWords({ language: 'es' }, conn).items;
+      let word = items.find((w) => w.word === 'resiliencia');
+      expect(word).toBeDefined();
+      expect(word?.occurrences).toBe(1);
+      const initialTime = new Date(word!.firstUsedAt).getTime();
+      expect(new Date(word!.lastUsedAt).getTime()).toBe(initialTime);
+
+      // 2. Ingest newer date: 2025-01-01
+      const newerDate = '2025-01-01T12:00:00Z';
+      activeService.analyzeAndIngestText('resiliencia', 'es', newerDate, conn);
+
+      items = activeService.getActiveWords({ language: 'es' }, conn).items;
+      word = items.find((w) => w.word === 'resiliencia');
+      expect(word?.occurrences).toBe(2);
+      // firstUsedAt must stay at 2024-06-01
+      expect(new Date(word!.firstUsedAt).getTime()).toBe(initialTime);
+      // lastUsedAt must advance to 2025-01-01
+      expect(new Date(word!.lastUsedAt).getTime()).toBe(new Date(newerDate).getTime());
+
+      // 3. Ingest older/historical date: 2022-03-15
+      const olderDate = '2022-03-15T10:00:00Z';
+      activeService.analyzeAndIngestText('resiliencia', 'es', olderDate, conn);
+
+      items = activeService.getActiveWords({ language: 'es' }, conn).items;
+      word = items.find((w) => w.word === 'resiliencia');
+      expect(word?.occurrences).toBe(3);
+      // firstUsedAt must expand backwards to older date 2022-03-15
+      expect(new Date(word!.firstUsedAt).getTime()).toBe(new Date(olderDate).getTime());
+      // lastUsedAt must still be 2025-01-01
+      expect(new Date(word!.lastUsedAt).getTime()).toBe(new Date(newerDate).getTime());
+
+      // 4. Ingest intermediate date: 2023-08-20
+      const intermediateDate = '2023-08-20T10:00:00Z';
+      activeService.analyzeAndIngestText('resiliencia', 'es', intermediateDate, conn);
+
+      items = activeService.getActiveWords({ language: 'es' }, conn).items;
+      word = items.find((w) => w.word === 'resiliencia');
+      expect(word?.occurrences).toBe(4);
+      // Both bounds must remain intact
+      expect(new Date(word!.firstUsedAt).getTime()).toBe(new Date(olderDate).getTime());
+      expect(new Date(word!.lastUsedAt).getTime()).toBe(new Date(newerDate).getTime());
+    });
+
+    it('should sort words by earliest usage (first_used_desc and first_used_asc)', () => {
+      // Ingest 'antiguo' with 2021 date
+      activeService.analyzeAndIngestText('antiguo', 'es', '2021-01-01T00:00:00Z', conn);
+      // Ingest 'reciente' with 2025 date
+      activeService.analyzeAndIngestText('reciente', 'es', '2025-01-01T00:00:00Z', conn);
+
+      const descRes = activeService.getActiveWords({ sort: 'first_used_desc', language: 'es' }, conn);
+      expect(descRes.items[0].word).toBe('reciente');
+      expect(descRes.items[1].word).toBe('antiguo');
+
+      const ascRes = activeService.getActiveWords({ sort: 'first_used_asc', language: 'es' }, conn);
+      expect(ascRes.items[0].word).toBe('antiguo');
+      expect(ascRes.items[1].word).toBe('reciente');
+    });
+
+    it('should anchor date-only strings (YYYY-MM-DD) to midday to prevent timezone day shift', () => {
+      activeService.analyzeAndIngestText('verano', 'es', '2026-07-20', conn);
+
+      const items = activeService.getActiveWords({ language: 'es' }, conn).items;
+      const word = items.find((w) => w.word === 'verano');
+      expect(word).toBeDefined();
+
+      // Ensure the timestamp is anchored to 12:00:00 UTC
+      const date = new Date(word!.firstUsedAt);
+      expect(date.toISOString()).toBe('2026-07-20T12:00:00.000Z');
+      expect(date.getUTCFullYear()).toBe(2026);
+      expect(date.getUTCMonth()).toBe(6); // 0-indexed: 6 = July
+      expect(date.getUTCDate()).toBe(20);
+    });
   });
 });
