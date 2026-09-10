@@ -67,3 +67,25 @@
   2. `ActiveWordsManager.tsx`: Text input analysis box, live submission metrics, frequency-ranked data table with search.
   3. Search & filter bar with debounce.
 - **Verification Gate**: Full end-to-end interactive flow test (import passive words, submit active text, verify live updates).
+
+---
+
+### Phase 7: Date-Aware Active Vocabulary Ingestion & Historical Timeline
+- **Goal**: Support historical and backdated text ingestion by adding a date picker in the active tokenizer, updating active words with bidirectional boundary tracking (`first_used_at` as earliest date seen, `last_used_at` as latest date seen), and adding earliest-usage sorting.
+- **Tasks**:
+  1. Update `ActiveVocabService.analyzeAndIngestText` to accept an optional custom `date` (timestamp or Date object, defaulting to current time).
+  2. Modify atomic upsert SQL statement in `ActiveVocabService` to enforce temporal boundaries:
+     - `first_used_at = MIN(active_words.first_used_at, excluded.first_used_at)`
+     - `last_used_at = MAX(active_words.last_used_at, excluded.last_used_at)`
+  3. Support `first_used_desc` in `ActiveVocabService.getActiveWords` and the `GET /api/active/words` endpoint.
+  4. Update `POST /api/active/analyze-text` route to parse, validate, and pass optional `date` payload to the domain service.
+  5. Update `ActiveWordsManager.tsx` UI:
+     - Add date input field (`<input type="date" />`) in the text submission card, defaulting to today's date.
+     - Include selected date in analysis payload.
+     - Add '1° uso' sort button to sort by earliest historical usage.
+  6. Add unit and integration tests in `tests/services.test.ts` & `tests/api.test.ts`:
+     - Ingesting text with an older date updates `first_used_at` and preserves `last_used_at`.
+     - Ingesting text with a newer date updates `last_used_at` and preserves `first_used_at`.
+     - Ingesting text with an intermediate date preserves both boundaries while accumulating `occurrences`.
+     - Sorting by `first_used_desc` returns words ordered by earliest usage.
+- **Verification Gate**: Vitest test suite passes with 100% of new temporal boundary and sorting tests passing cleanly.

@@ -110,7 +110,8 @@ export const activeWords = sqliteTable(
   VALUES (?, ?, ?, ?, ?)
   ON CONFLICT(word, language) DO UPDATE SET
     occurrences = active_words.occurrences + excluded.occurrences,
-    last_used_at = excluded.last_used_at;
+    first_used_at = MIN(active_words.first_used_at, excluded.first_used_at),
+    last_used_at = MAX(active_words.last_used_at, excluded.last_used_at);
   ```
 
 ---
@@ -130,7 +131,7 @@ export const activeWords = sqliteTable(
 - **Response**: `{ items: Array<PassiveWord>, total: number, page: number }`
 
 ### `POST /api/active/analyze-text`
-- **Body**: `{ text: string, language?: string }`
+- **Body**: `{ text: string, language?: string, date?: string | number }`
 - **Response**:
   ```json
   {
@@ -143,5 +144,5 @@ export const activeWords = sqliteTable(
   ```
 
 ### `GET /api/active/words`
-- **Query**: `?language=es&q=query&page=1&limit=50&sort=occurrences_desc`
+- **Query**: `?language=es&q=query&page=1&limit=50&sort=occurrences_desc|date_desc|first_used_desc|alpha`
 - **Response**: `{ items: Array<ActiveWord>, total: number, page: number }`

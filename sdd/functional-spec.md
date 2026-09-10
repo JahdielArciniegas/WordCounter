@@ -19,8 +19,8 @@ WordCounter enables language learners and writers to quantitatively track and un
 - **Concept**: Words the user actively uses in spoken or written communication.
 - **Characteristics**:
   - Word entity per language (`word`, `language`).
-  - `first_used_at`: Timestamp when the word was first submitted in any text.
-  - `last_used_at`: Timestamp of the most recent text submission containing the word.
+  - `first_used_at`: Timestamp representing the earliest authored text date where the word was observed.
+  - `last_used_at`: Timestamp representing the most recent authored text date where the word was observed.
   - `occurrences`: Cumulative integer count summing every instance the word has appeared across all submitted texts.
   - **Privacy & Storage Constraint**: Raw input texts are processed strictly in-memory, tokenized, and discarded. Full texts are never stored.
 
@@ -50,27 +50,29 @@ WordCounter enables language learners and writers to quantitatively track and un
 ### 3.2 Active Vocabulary Management
 1. **Text Submission & Ingestion**:
    - The user pastes an arbitrary block of authored text (e.g. journal entry, essay, chat transcript).
-   - The system submits the text to the backend analysis endpoint.
+   - The user optionally supplies an authoring date for the text (defaulting to the current date if omitted).
+   - The system submits the text and authoring timestamp to the backend analysis endpoint.
 
 2. **Tokenization & Frequency Counting**:
    - The text is tokenized into clean lexical tokens (punctuations stripped, case normalized).
    - Frequency map of `word -> count` is calculated for the submission.
 
-3. **Cumulative Update**:
-   - For each token in the frequency map:
+3. **Cumulative Update & Bidirectional Temporal Tracking**:
+   - For each token in the frequency map at submission date $T$:
      - If the word already exists in Active Vocabulary:
        - `occurrences += token_count`
-       - `last_used_at = now()`
+       - `first_used_at = min(first_used_at, T)` (expands backwards if older historical text is submitted)
+       - `last_used_at = max(last_used_at, T)` (advances forward if newer text is submitted)
      - If the word is new:
-       - `first_used_at = now()`
-       - `last_used_at = now()`
+       - `first_used_at = T`
+       - `last_used_at = T`
        - `occurrences = token_count`
    - Ingestion summary returned to the user: Total tokens analyzed, unique words, new words discovered, and existing words updated.
 
 4. **Active Words Exploration & Search**:
    - List displaying words with `occurrences`, `first_used_at`, and `last_used_at`.
    - Real-time search bar with filtering.
-   - Sorting options: Frequency (highest to lowest), Recency (`last_used_at`), and Alphabetical.
+   - Sorting options: Frequency (highest to lowest), Recency (`last_used_at`), Earliest Usage (`first_used_at`), and Alphabetical.
 
 ### 3.3 UI Navigation & Layout
 - **Dedicated Active Section**: Focus on text input, instant token metrics, and active vocabulary table.
