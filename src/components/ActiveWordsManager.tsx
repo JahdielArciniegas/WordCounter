@@ -34,11 +34,18 @@ export const ActiveWordsManager: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [sortBy, setSortBy] = useState<
-    "occurrences_desc" | "date_desc" | "alpha"
+    "occurrences_desc" | "date_desc" | "first_used_desc" | "alpha"
   >("occurrences_desc");
 
   // Input & Analysis State
   const [textInput, setTextInput] = useState<string>("");
+  const [dateInput, setDateInput] = useState<string>(() => {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  });
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [analysisResult, setAnalysisResult] = useState<AnalysisSummary | null>(
     null,
@@ -120,7 +127,11 @@ export const ActiveWordsManager: React.FC = () => {
       const res = await fetch("/api/active/analyze-text", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: textInput, language: "es" }),
+        body: JSON.stringify({
+          text: textInput,
+          language: "es",
+          date: dateInput || undefined,
+        }),
       });
 
       const data = await res.json();
@@ -167,12 +178,25 @@ export const ActiveWordsManager: React.FC = () => {
             className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-emerald-500/60 focus:ring-1 focus:ring-emerald-500/60"
           />
 
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-zinc-500">
-              {textInput.length > 0
-                ? `${textInput.trim().split(/\s+/).length} palabras aproximadas`
-                : ""}
-            </span>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="flex items-center gap-1.5 bg-zinc-950 border border-zinc-800 rounded-lg px-2.5 py-1.5 text-xs text-zinc-300">
+                <Calendar className="w-3.5 h-3.5 text-emerald-400" />
+                <span className="text-zinc-500 font-mono">Fecha:</span>
+                <input
+                  type="date"
+                  value={dateInput}
+                  onChange={(e) => setDateInput(e.target.value)}
+                  className="bg-transparent text-zinc-200 text-xs focus:outline-none focus:text-emerald-300 cursor-pointer scheme:dark"
+                />
+              </div>
+
+              <span className="text-xs text-zinc-500">
+                {textInput.length > 0
+                  ? `${textInput.trim().split(/\s+/).length} palabras aproximadas`
+                  : ""}
+              </span>
+            </div>
 
             <button
               type="submit"
@@ -301,6 +325,16 @@ export const ActiveWordsManager: React.FC = () => {
                 }`}
               >
                 Último uso
+              </button>
+              <button
+                onClick={() => setSortBy("first_used_desc")}
+                className={`px-3 py-1 rounded transition-colors ${
+                  sortBy === "first_used_desc"
+                    ? "bg-zinc-800 text-emerald-300 font-medium"
+                    : "text-zinc-400 hover:text-zinc-200"
+                }`}
+              >
+                1° uso
               </button>
               <button
                 onClick={() => setSortBy("alpha")}
