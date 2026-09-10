@@ -190,6 +190,11 @@ export class ActiveVocabService {
     const { db } = this.getDb(conn);
     db.delete(activeWords).where(eq(activeWords.id, id)).run();
   }
+
+  clearAll(conn?: { db: any; sqlite: Database.Database }): void {
+    const { db } = this.getDb(conn);
+    db.delete(activeWords).run();
+  }
 }
 
 export const activeVocabService = new ActiveVocabService();

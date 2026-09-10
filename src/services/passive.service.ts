@@ -185,6 +185,11 @@ export class PassiveVocabService {
     const { db } = this.getDb(conn);
     db.delete(passiveWords).where(eq(passiveWords.id, id)).run();
   }
+
+  clearAll(conn?: { db: any; sqlite: Database.Database }): void {
+    const { db } = this.getDb(conn);
+    db.delete(passiveWords).run();
+  }
 }
 
 export const passiveVocabService = new PassiveVocabService();

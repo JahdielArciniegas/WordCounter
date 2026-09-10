@@ -43,3 +43,20 @@ export const GET: APIRoute = async ({ url }) => {
     );
   }
 };
+
+export const DELETE: APIRoute = async () => {
+  try {
+    activeVocabService.clearAll();
+    return new Response(JSON.stringify({ success: true }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch (error: any) {
+    return new Response(
+      JSON.stringify({
+        error: error.message || "Error al limpiar palabras activas",
+      }),
+      { status: 500, headers: { "Content-Type": "application/json" } },
+    );
+  }
+};
