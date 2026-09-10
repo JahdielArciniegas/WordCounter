@@ -82,6 +82,22 @@ export const ActiveWordsManager: React.FC = () => {
     }
   };
 
+  const handleClearAll = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/active/words", {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        fetchWords();
+      }
+    } catch (err) {
+      console.error("Error al limpiar palabras:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchWords(searchQuery, sortBy);
   }, [sortBy]);
@@ -263,37 +279,45 @@ export const ActiveWordsManager: React.FC = () => {
             />
           </div>
 
-          {/* Sort Controls */}
-          <div className="flex items-center bg-zinc-900 border border-zinc-800 rounded-lg p-1 text-xs">
+          <div className="flex items-center gap-2">
+            {/* Sort Controls */}
+            <div className="flex items-center bg-zinc-900 border border-zinc-800 rounded-lg p-1 text-xs">
+              <button
+                onClick={() => setSortBy("occurrences_desc")}
+                className={`px-3 py-1 rounded transition-colors ${
+                  sortBy === "occurrences_desc"
+                    ? "bg-zinc-800 text-emerald-300 font-medium"
+                    : "text-zinc-400 hover:text-zinc-200"
+                }`}
+              >
+                Frecuencia
+              </button>
+              <button
+                onClick={() => setSortBy("date_desc")}
+                className={`px-3 py-1 rounded transition-colors ${
+                  sortBy === "date_desc"
+                    ? "bg-zinc-800 text-emerald-300 font-medium"
+                    : "text-zinc-400 hover:text-zinc-200"
+                }`}
+              >
+                Último uso
+              </button>
+              <button
+                onClick={() => setSortBy("alpha")}
+                className={`px-3 py-1 rounded transition-colors ${
+                  sortBy === "alpha"
+                    ? "bg-zinc-800 text-emerald-300 font-medium"
+                    : "text-zinc-400 hover:text-zinc-200"
+                }`}
+              >
+                A - Z
+              </button>
+            </div>
             <button
-              onClick={() => setSortBy("occurrences_desc")}
-              className={`px-3 py-1 rounded transition-colors ${
-                sortBy === "occurrences_desc"
-                  ? "bg-zinc-800 text-emerald-300 font-medium"
-                  : "text-zinc-400 hover:text-zinc-200"
-              }`}
+              onClick={() => handleClearAll()}
+              className="text-zinc-400 hover:text-red-400 transition-colors"
             >
-              Frecuencia
-            </button>
-            <button
-              onClick={() => setSortBy("date_desc")}
-              className={`px-3 py-1 rounded transition-colors ${
-                sortBy === "date_desc"
-                  ? "bg-zinc-800 text-emerald-300 font-medium"
-                  : "text-zinc-400 hover:text-zinc-200"
-              }`}
-            >
-              Último uso
-            </button>
-            <button
-              onClick={() => setSortBy("alpha")}
-              className={`px-3 py-1 rounded transition-colors ${
-                sortBy === "alpha"
-                  ? "bg-zinc-800 text-emerald-300 font-medium"
-                  : "text-zinc-400 hover:text-zinc-200"
-              }`}
-            >
-              A - Z
+              <Trash2 className="w-4 h-4" />
             </button>
           </div>
         </div>

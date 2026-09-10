@@ -83,6 +83,22 @@ export const PassiveWordsManager: React.FC<PassiveWordsManagerProps> = ({
     }
   };
 
+  const handleClearAll = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/passive/words", {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        fetchWords();
+      }
+    } catch (err) {
+      console.error("Error al limpiar palabras:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchWords(searchQuery, sortBy);
   }, [sortBy]);
@@ -228,6 +244,12 @@ export const PassiveWordsManager: React.FC<PassiveWordsManagerProps> = ({
           >
             <Upload className="w-4 h-4" />
             <span>Importar Palabras</span>
+          </button>
+          <button
+            onClick={() => handleClearAll()}
+            className="text-zinc-400 hover:text-red-400 transition-colors"
+          >
+            <Trash2 className="w-4 h-4" />
           </button>
         </div>
       </div>
