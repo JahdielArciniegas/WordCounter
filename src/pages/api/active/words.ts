@@ -18,7 +18,10 @@ export const GET: APIRoute = async ({ url }) => {
       ? Math.max(parseInt(offsetParam, 10) || 0, 0)
       : 0;
     const sort =
-      sortParam === "date_desc" || sortParam === "alpha"
+      sortParam === "date_desc" ||
+      sortParam === "first_used_desc" ||
+      sortParam === "first_used_asc" ||
+      sortParam === "alpha"
         ? sortParam
         : "occurrences_desc";
 

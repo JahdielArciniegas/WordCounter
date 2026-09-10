@@ -17,7 +17,12 @@ export interface GetActiveOptions {
   language?: string;
   limit?: number;
   offset?: number;
-  sort?: "occurrences_desc" | "date_desc" | "alpha";
+  sort?:
+    | "occurrences_desc"
+    | "date_desc"
+    | "first_used_desc"
+    | "first_used_asc"
+    | "alpha";
 }
 
 export interface OverallStats {
@@ -40,8 +45,27 @@ export class ActiveVocabService {
   analyzeAndIngestText(
     text: string,
     language: string = "es",
-    conn?: { db: any; sqlite: Database.Database },
+    customDateOrConn?:
+      | Date
+      | string
+      | number
+      | { db: any; sqlite: Database.Database },
+    customConn?: { db: any; sqlite: Database.Database },
   ): ActiveAnalysisSummary {
+    let customDate: Date | string | number | undefined;
+    let conn = customConn;
+
+    if (
+      customDateOrConn &&
+      typeof customDateOrConn === "object" &&
+      "sqlite" in customDateOrConn
+    ) {
+      conn = customDateOrConn;
+      customDate = undefined;
+    } else {
+      customDate = customDateOrConn as Date | string | number | undefined;
+    }
+
     const { sqlite } = this.getDb(conn);
 
     const tokenized = tokenizeText(text, language);
@@ -55,16 +79,44 @@ export class ActiveVocabService {
       };
     }
 
+    let timestampInSeconds: number;
+    if (!customDate) {
+      timestampInSeconds = Math.floor(Date.now() / 1000);
+    } else if (typeof customDate === "number") {
+      timestampInSeconds =
+        customDate > 1e11
+          ? Math.floor(customDate / 1000)
+          : Math.floor(customDate);
+    } else if (typeof customDate === "string") {
+      let dateToParse = customDate.trim();
+      if (/^\d{4}-\d{2}-\d{2}$/.test(dateToParse)) {
+        dateToParse = `${dateToParse}T12:00:00Z`;
+      } else if (/^\d{4}-\d{2}-\d{2}T00:00:00(\.000)?Z?$/i.test(dateToParse)) {
+        dateToParse = dateToParse.replace(/T00:00:00(\.000)?Z?$/i, "T12:00:00Z");
+      }
+      const parsed = new Date(dateToParse);
+      timestampInSeconds = isNaN(parsed.getTime())
+        ? Math.floor(Date.now() / 1000)
+        : Math.floor(parsed.getTime() / 1000);
+    } else if (customDate instanceof Date) {
+      timestampInSeconds = isNaN(customDate.getTime())
+        ? Math.floor(Date.now() / 1000)
+        : Math.floor(customDate.getTime() / 1000);
+    } else {
+      timestampInSeconds = Math.floor(Date.now() / 1000);
+    }
+
     const checkStmt = sqlite.prepare(`
       SELECT 1 FROM active_words WHERE word = ? AND language = ?
     `);
 
     const upsertStmt = sqlite.prepare(`
       INSERT INTO active_words (word, language, occurrences, first_used_at, last_used_at)
-      VALUES (?, ?, ?, strftime('%s', 'now'), strftime('%s', 'now'))
+      VALUES (?, ?, ?, ?, ?)
       ON CONFLICT(word, language) DO UPDATE SET
         occurrences = active_words.occurrences + excluded.occurrences,
-        last_used_at = excluded.last_used_at
+        first_used_at = MIN(active_words.first_used_at, excluded.first_used_at),
+        last_used_at = MAX(active_words.last_used_at, excluded.last_used_at)
     `);
 
     let newCount = 0;
@@ -79,7 +131,13 @@ export class ActiveVocabService {
           } else {
             newCount++;
           }
-          upsertStmt.run(item.word, language, item.count);
+          upsertStmt.run(
+            item.word,
+            language,
+            item.count,
+            timestampInSeconds,
+            timestampInSeconds,
+          );
         }
       },
     );
@@ -120,6 +178,12 @@ export class ActiveVocabService {
 
     let orderBy;
     switch (sort) {
+      case "first_used_desc":
+        orderBy = desc(activeWords.firstUsedAt);
+        break;
+      case "first_used_asc":
+        orderBy = asc(activeWords.firstUsedAt);
+        break;
       case "date_desc":
         orderBy = desc(activeWords.lastUsedAt);
         break;

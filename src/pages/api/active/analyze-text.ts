@@ -1,42 +1,48 @@
-import type { APIRoute } from 'astro';
-import { activeVocabService } from '../../../services/active.service';
+import type { APIRoute } from "astro";
+import { activeVocabService } from "../../../services/active.service";
 
 export const prerender = false;
 
 export const POST: APIRoute = async ({ request }) => {
   try {
-    const contentType = request.headers.get('content-type') || '';
-    let text = '';
-    let language = 'es';
+    const contentType = request.headers.get("content-type") || "";
+    let text = "";
+    let language = "es";
+    let date: string | number | undefined = undefined;
 
-    if (contentType.includes('application/json')) {
+    if (contentType.includes("application/json")) {
       const body = await request.json();
       text = body.text;
-      language = body.language || 'es';
+      language = body.language || "es";
+      date = body.date;
     } else {
       text = await request.text();
     }
 
-    if (!text || typeof text !== 'string' || text.trim().length === 0) {
+    if (!text || typeof text !== "string" || text.trim().length === 0) {
       return new Response(
-        JSON.stringify({ error: 'Debes proporcionar un texto válido para analizar' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
+        JSON.stringify({
+          error: "Debes proporcionar un texto válido para analizar",
+        }),
+        { status: 400, headers: { "Content-Type": "application/json" } },
       );
     }
 
-    const summary = activeVocabService.analyzeAndIngestText(text, language);
+    const summary = activeVocabService.analyzeAndIngestText(text, language, date);
 
     return new Response(
       JSON.stringify({
         success: true,
         ...summary,
       }),
-      { status: 200, headers: { 'Content-Type': 'application/json' } }
+      { status: 200, headers: { "Content-Type": "application/json" } },
     );
   } catch (error: any) {
     return new Response(
-      JSON.stringify({ error: error.message || 'Error al analizar el texto activo' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+      JSON.stringify({
+        error: error.message || "Error al analizar el texto activo",
+      }),
+      { status: 500, headers: { "Content-Type": "application/json" } },
     );
   }
 };
