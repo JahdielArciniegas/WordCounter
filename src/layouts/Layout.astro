@@ -10,64 +10,99 @@ const { title = 'WordCounter — Vocabulary Tracker', currentPath = Astro.url.pa
 
 const navItems = [
   { href: '/', label: 'Dashboard', exact: true },
-  { href: '/active', label: 'Vocabulario Activo', exact: false },
-  { href: '/passive', label: 'Vocabulario Pasivo', exact: false },
+  { href: '/active', label: 'Vocabulario Activo', exact: false, badge: 'producción' },
+  { href: '/passive', label: 'Vocabulario Pasivo', exact: false, badge: 'reconocimiento' },
 ];
 ---
 
 <!doctype html>
-<html lang="es" class="dark">
+<html lang="es" class="dark scroll-smooth">
   <head>
     <meta charset="utf-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
   </head>
-  <body class="bg-zinc-950 text-zinc-100 min-h-screen flex flex-col antialiased selection:bg-indigo-500/30 selection:text-indigo-200">
+  <body class="bg-[#09090b] text-zinc-100 min-h-screen flex flex-col antialiased selection:bg-emerald-500/20 selection:text-emerald-200">
     <!-- Top Navigation Bar -->
-    <header class="border-b border-zinc-800/80 bg-zinc-900/60 backdrop-blur-md sticky top-0 z-40">
-      <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-        <div class="flex items-center space-x-3">
-          <a href="/" class="flex items-center space-x-2 text-indigo-400 hover:text-indigo-300 font-bold text-lg tracking-tight">
-            <span class="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 font-mono text-base">
+    <header class="border-b border-zinc-800/60 bg-[#09090b]/80 backdrop-blur-md sticky top-0 z-40">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+        <div class="flex items-center space-x-6">
+          <a href="/" class="flex items-center space-x-2.5 group">
+            <span class="w-7 h-7 rounded-md bg-zinc-900 border border-zinc-700/60 flex items-center justify-center text-zinc-200 font-mono text-xs font-semibold group-hover:border-emerald-500/50 group-hover:text-emerald-400 transition-colors">
               W
             </span>
-            <span>WordCounter</span>
+            <span class="font-semibold text-sm tracking-tight text-zinc-100 group-hover:text-white transition-colors">
+              WordCounter
+            </span>
           </a>
+
+          <nav class="hidden md:flex items-center space-x-1 p-0.5 rounded-lg bg-zinc-900/60 border border-zinc-800/60 text-xs">
+            {
+              navItems.map((item) => {
+                const isActive = item.exact ? currentPath === item.href : currentPath.startsWith(item.href);
+                return (
+                  <a
+                    href={item.href}
+                    class={`px-3 py-1.5 rounded-md font-medium transition-all ${
+                      isActive
+                        ? 'bg-zinc-800/90 text-zinc-100 shadow-xs border border-zinc-700/60'
+                        : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/30 border border-transparent'
+                    }`}
+                  >
+                    {item.label}
+                  </a>
+                );
+              })
+            }
+          </nav>
         </div>
 
-        <nav class="flex items-center space-x-1 sm:space-x-2">
-          {
-            navItems.map((item) => {
-              const isActive = item.exact ? currentPath === item.href : currentPath.startsWith(item.href);
-              return (
-                <a
-                  href={item.href}
-                  class={`px-3.5 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                    isActive
-                      ? 'bg-zinc-800 text-indigo-300 border border-zinc-700 shadow-sm'
-                      : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40'
-                  }`}
-                >
-                  {item.label}
-                </a>
-              );
-            })
-          }
-        </nav>
+        <div class="flex items-center space-x-3">
+          <!-- Mobile nav simple row -->
+          <nav class="flex md:hidden items-center space-x-1 text-xs">
+            {
+              navItems.map((item) => {
+                const isActive = item.exact ? currentPath === item.href : currentPath.startsWith(item.href);
+                return (
+                  <a
+                    href={item.href}
+                    class={`px-2.5 py-1 rounded-md font-medium transition-all ${
+                      isActive
+                        ? 'bg-zinc-800 text-zinc-100'
+                        : 'text-zinc-400 hover:text-zinc-200'
+                    }`}
+                  >
+                    {item.label.replace('Vocabulario ', '')}
+                  </a>
+                );
+              })
+            }
+          </nav>
+
+          <!-- System indicator -->
+          <div class="hidden sm:flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-zinc-900/80 border border-zinc-800/80 text-[11px] font-mono text-zinc-400">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>SQLite Local</span>
+          </div>
+        </div>
       </div>
     </header>
 
     <!-- Main Content -->
-    <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8">
+    <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-8">
       <slot />
     </main>
 
     <!-- Footer -->
-    <footer class="border-t border-zinc-800/60 bg-zinc-950/40 py-6 text-center text-xs text-zinc-500">
-      <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-        <p>WordCounter • Sistema local de seguimiento de vocabulario</p>
-        <p class="font-mono text-zinc-600">Hecho por Jahdiel Arciniegas • 2026</p>
+    <footer class="border-t border-zinc-900 bg-[#09090b] py-6 text-xs text-zinc-500">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div class="flex items-center space-x-2">
+          <span class="font-medium text-zinc-400">WordCounter</span>
+          <span>•</span>
+          <span>Medición cuantitativa de vocabulario</span>
+        </div>
+        <p class="font-mono text-zinc-600 text-[11px]">Hecho por Jahdiel Arciniegas • 2026</p>
       </div>
     </footer>
   </body>
