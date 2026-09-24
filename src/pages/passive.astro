@@ -11,21 +11,24 @@ const initialData = passiveVocabService.getPassiveWords({ limit: 100 });
 <Layout title="Vocabulario Pasivo — WordCounter">
   <div class="space-y-6">
     <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800 pb-5">
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-zinc-800/60 pb-5">
       <div>
-        <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-100 flex items-center gap-2">
-          <span class="w-3 h-3 rounded-full bg-amber-400 inline-block"></span>
+        <div class="flex items-center gap-2 text-xs font-mono text-zinc-500 uppercase tracking-wider mb-1">
+          <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+          <span>Reconocimiento Léxico</span>
+        </div>
+        <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-zinc-100">
           Vocabulario Pasivo
         </h1>
-        <p class="text-zinc-400 text-sm mt-1">
-          Palabras reconocidas y comprendidas. Las importaciones duplicadas son ignoradas.
+        <p class="text-zinc-400 text-xs sm:text-sm mt-1">
+          Palabras que reconocés y comprendés al leer o escuchar. Las importaciones duplicadas son omitidas automáticamente.
         </p>
       </div>
 
       <div class="flex items-center gap-2">
-        <span class="bg-zinc-900 border border-zinc-700/80 px-3 py-1.5 rounded-md text-xs font-mono text-zinc-300">
-          Total: <strong class="text-amber-400">{initialData.total}</strong> palabras
-        </span>
+        <div class="bg-zinc-900/80 border border-zinc-800 px-3 py-1.5 rounded-lg text-xs font-mono text-zinc-300">
+          <span class="text-zinc-500">Total:</span> <strong class="text-amber-400 font-semibold">{initialData.total}</strong> palabras
+        </div>
       </div>
     </div>
 

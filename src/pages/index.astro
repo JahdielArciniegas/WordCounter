@@ -1,117 +1,186 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { ActiveWordsManager } from '../components/ActiveWordsManager';
 import { activeVocabService } from '../services/active.service';
 
 export const prerender = false;
 
 const stats = activeVocabService.getStats('es');
-const topActive = activeVocabService.getActiveWords({ limit: 5, sort: 'occurrences_desc' });
+const topActive = activeVocabService.getActiveWords({ limit: 14, sort: 'occurrences_desc' });
+
+const totalUnique = stats.activeCount + stats.passiveCount;
+const activePercent = totalUnique > 0 ? Math.round((stats.activeCount / totalUnique) * 100) : 0;
+const passivePercent = totalUnique > 0 ? 100 - activePercent : 0;
 ---
 
 <Layout title="Dashboard — WordCounter">
-  <div class="space-y-8">
-    <!-- Hero Section -->
-    <div class="border border-zinc-800 bg-zinc-900/40 rounded-xl p-6 sm:p-8 backdrop-blur-sm">
-      <div class="max-w-2xl">
-        <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-zinc-100 mb-2">
-          Control de Vocabulario Cuantitativo
+  <div class="space-y-6">
+    <!-- Header / Thesis Viewport -->
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-2 border-b border-zinc-800/60">
+      <div>
+        <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-zinc-100">
+          Medición Cuantitativa de Vocabulario
         </h1>
-        <p class="text-zinc-400 text-sm sm:text-base leading-relaxed">
-          Distingue con precisión las palabras que <span class="text-indigo-400 font-medium">reconoces pasivamente</span> de las que <span class="text-emerald-400 font-medium">produces activamente</span> con frecuencias reales de uso acumuladas en tus textos.
+        <p class="text-zinc-400 text-xs sm:text-sm mt-1 max-w-xl">
+          Contabilización precisa de palabras activas (producción real en textos) frente a palabras pasivas (reconocimiento).
         </p>
+      </div>
+
+      <div class="flex items-center gap-2 self-start sm:self-auto">
+        <span class="text-[11px] font-mono text-zinc-400 uppercase tracking-wider bg-zinc-900 px-2.5 py-1 rounded-md border border-zinc-800">
+          Total: <strong class="text-zinc-200">{totalUnique}</strong> palabras
+        </span>
       </div>
     </div>
 
-    <!-- Metric Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-      <!-- Active Words Card -->
-      <div class="border border-zinc-800 bg-zinc-900/30 rounded-lg p-5">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-semibold uppercase tracking-wider text-emerald-400">Vocabulario Activo</span>
-          <span class="text-xs font-mono text-zinc-500">Únicas</span>
+    <!-- Active vs Passive Ratio Bar (Lute / LingQ / Anki insight made minimal) -->
+    {totalUnique > 0 && (
+      <div class="rounded-lg border border-zinc-800/80 bg-zinc-900/30 p-3.5 space-y-2">
+        <div class="flex items-center justify-between text-xs font-mono">
+          <div class="flex items-center gap-1.5 sm:gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+            <span class="text-zinc-200 font-medium">Activo: {activePercent}%</span>
+            <span class="text-zinc-500 text-[11px] hidden sm:inline">({stats.activeCount} palabras)</span>
+          </div>
+          <div class="flex items-center gap-1.5 sm:gap-2">
+            <span class="text-zinc-500 text-[11px] hidden sm:inline">({stats.passiveCount} palabras)</span>
+            <span class="text-zinc-200 font-medium">Pasivo: {passivePercent}%</span>
+            <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+          </div>
         </div>
-        <div class="mt-3 flex items-baseline space-x-2">
-          <span class="text-3xl font-bold tracking-tight text-zinc-100">{stats.activeCount}</span>
+
+        <div class="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden flex">
+          <div style={`width: ${activePercent}%`} class="h-full bg-emerald-500 transition-all duration-500"></div>
+          <div style={`width: ${passivePercent}%`} class="h-full bg-amber-500 transition-all duration-500"></div>
+        </div>
+      </div>
+    )}
+
+    <!-- Metric Tiles Row -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+      <!-- Active Words Tile -->
+      <div class="border border-zinc-800/80 bg-zinc-900/40 rounded-xl p-4.5 transition-colors hover:border-zinc-700/80">
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-mono uppercase tracking-wider text-emerald-400 font-medium flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+            Vocabulario Activo
+          </span>
+          <span class="text-[11px] font-mono text-zinc-500">Léxico único</span>
+        </div>
+        <div class="mt-3 flex items-baseline gap-2">
+          <span class="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-100 font-mono">{stats.activeCount}</span>
           <span class="text-xs text-zinc-400">palabras</span>
         </div>
-        <p class="mt-2 text-xs text-zinc-500">Palabras producidas en textos analizados</p>
+        <p class="mt-1.5 text-xs text-zinc-500">Producidas y medidas en textos analizados</p>
       </div>
 
-      <!-- Active Occurrences Card -->
-      <div class="border border-zinc-800 bg-zinc-900/30 rounded-lg p-5">
+      <!-- Total Occurrences Tile -->
+      <div class="border border-zinc-800/80 bg-zinc-900/40 rounded-xl p-4.5 transition-colors hover:border-zinc-700/80">
         <div class="flex items-center justify-between">
-          <span class="text-xs font-semibold uppercase tracking-wider text-indigo-400">Total Ocurrencias</span>
-          <span class="text-xs font-mono text-zinc-500">Frecuencia</span>
+          <span class="text-[11px] font-mono uppercase tracking-wider text-indigo-400 font-medium flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
+            Total Ocurrencias
+          </span>
+          <span class="text-[11px] font-mono text-zinc-500">Frecuencia</span>
         </div>
-        <div class="mt-3 flex items-baseline space-x-2">
-          <span class="text-3xl font-bold tracking-tight text-zinc-100">{stats.totalActiveOccurrences}</span>
-          <span class="text-xs text-zinc-400">usos</span>
+        <div class="mt-3 flex items-baseline gap-2">
+          <span class="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-100 font-mono">{stats.totalActiveOccurrences}</span>
+          <span class="text-xs text-zinc-400">repeticiones</span>
         </div>
-        <p class="mt-2 text-xs text-zinc-500">Suma acumulativa de todas las apariciones</p>
+        <p class="mt-1.5 text-xs text-zinc-500">Volumen acumulado de uso efectivo</p>
       </div>
 
-      <!-- Passive Words Card -->
-      <div class="border border-zinc-800 bg-zinc-900/30 rounded-lg p-5">
+      <!-- Passive Words Tile -->
+      <div class="border border-zinc-800/80 bg-zinc-900/40 rounded-xl p-4.5 transition-colors hover:border-zinc-700/80">
         <div class="flex items-center justify-between">
-          <span class="text-xs font-semibold uppercase tracking-wider text-amber-400">Vocabulario Pasivo</span>
-          <span class="text-xs font-mono text-zinc-500">Reconocidas</span>
+          <span class="text-[11px] font-mono uppercase tracking-wider text-amber-400 font-medium flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+            Vocabulario Pasivo
+          </span>
+          <span class="text-[11px] font-mono text-zinc-500">Reconocidas</span>
         </div>
-        <div class="mt-3 flex items-baseline space-x-2">
-          <span class="text-3xl font-bold tracking-tight text-zinc-100">{stats.passiveCount}</span>
+        <div class="mt-3 flex items-baseline gap-2">
+          <span class="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-100 font-mono">{stats.passiveCount}</span>
           <span class="text-xs text-zinc-400">palabras</span>
         </div>
-        <p class="mt-2 text-xs text-zinc-500">Importadas por listas o archivos CSV</p>
+        <p class="mt-1.5 text-xs text-zinc-500">Registradas por listas o archivos CSV</p>
       </div>
     </div>
 
-    <!-- Quick Navigation Actions -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      <a
-        href="/active"
-        class="group border border-zinc-800/80 bg-zinc-900/20 hover:bg-zinc-900/60 hover:border-emerald-500/40 p-6 rounded-lg transition-all"
-      >
-        <div class="flex items-center justify-between mb-2">
-          <h2 class="text-lg font-semibold text-zinc-200 group-hover:text-emerald-400 transition-colors">
-            Ingesta y Análisis Activo &rarr;
-          </h2>
-        </div>
-        <p class="text-sm text-zinc-400 leading-relaxed">
-          Pega un texto nuevo para tokenizarlo, calcular frecuencias por palabra y acumular tus métricas de producción en memoria.
-        </p>
-      </a>
-
-      <a
-        href="/passive"
-        class="group border border-zinc-800/80 bg-zinc-900/20 hover:bg-zinc-900/60 hover:border-amber-500/40 p-6 rounded-lg transition-all"
-      >
-        <div class="flex items-center justify-between mb-2">
-          <h2 class="text-lg font-semibold text-zinc-200 group-hover:text-amber-400 transition-colors">
-            Gestión de Vocabulario Pasivo &rarr;
-          </h2>
-        </div>
-        <p class="text-sm text-zinc-400 leading-relaxed">
-          Importa listas de palabras reconocidas por texto multilínea o archivos CSV con fechas históricas idempotentemente.
-        </p>
-      </a>
+    <!-- Direct In-Memory Text Analysis (First Viewport contract promise) -->
+    <div class="space-y-2">
+      <ActiveWordsManager client:load mode="analyzer-only" />
     </div>
 
-    <!-- Top Words Preview if exists -->
+    <!-- Top Words Frequency Cloud (Relocated right below active analysis area) -->
     {
       topActive.items.length > 0 && (
-        <div class="border border-zinc-800/80 bg-zinc-900/20 rounded-lg p-6">
-          <h3 class="text-sm font-semibold uppercase tracking-wider text-zinc-400 mb-4">
-            Palabras activas más frecuentes
-          </h3>
-          <div class="flex flex-wrap gap-2">
-            {topActive.items.map((item) => (
-              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono bg-zinc-800/80 text-zinc-300 border border-zinc-700/60">
-                <span class="text-emerald-400 font-semibold">{item.word}</span>
-                <span class="text-zinc-500">×{item.occurrences}</span>
-              </span>
+        <div class="border border-zinc-800/80 bg-zinc-900/20 rounded-xl p-4 sm:p-5 space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xs font-mono uppercase tracking-wider text-zinc-400 flex items-center gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
+              Palabras activas más recurrentes
+            </h3>
+            <a href="/active" class="text-xs text-zinc-500 hover:text-zinc-300 font-mono transition-colors">
+              Explorar vocabulario completo ({stats.activeCount}) &rarr;
+            </a>
+          </div>
+
+          <div class="flex flex-wrap gap-2 pt-1">
+            {topActive.items.map((item, index) => (
+              <a
+                href={`/active?q=${encodeURIComponent(item.word)}`}
+                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-mono bg-zinc-900 border border-zinc-800 text-zinc-300 hover:border-zinc-700 hover:text-zinc-100 transition-colors"
+              >
+                <span class="text-zinc-500 text-[10px]">#{index + 1}</span>
+                <span class="text-zinc-100 font-medium">{item.word}</span>
+                <span class="text-emerald-400 font-semibold bg-emerald-950/60 px-1.5 py-0.2 rounded border border-emerald-800/40 text-[11px]">
+                  ×{item.occurrences}
+                </span>
+              </a>
             ))}
           </div>
         </div>
       )
     }
+
+    <!-- Quick Navigation Action Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
+      <a
+        href="/active"
+        class="group border border-zinc-800/80 bg-zinc-900/20 hover:bg-zinc-900/60 hover:border-emerald-500/30 p-5 rounded-xl transition-all"
+      >
+        <div class="flex items-center justify-between mb-1.5">
+          <h2 class="text-sm font-semibold text-zinc-200 group-hover:text-emerald-300 transition-colors flex items-center gap-2">
+            <span>Explorador de Vocabulario Activo</span>
+            <span class="text-zinc-500 group-hover:translate-x-0.5 transition-transform">&rarr;</span>
+          </h2>
+          <span class="text-[11px] font-mono text-emerald-400/80 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+            {stats.activeCount} palabras
+          </span>
+        </div>
+        <p class="text-xs text-zinc-400 leading-relaxed">
+          Consulta fechas de primer y último uso, filtra por frecuencias y gestiona el historial completo de palabras producidas.
+        </p>
+      </a>
+
+      <a
+        href="/passive"
+        class="group border border-zinc-800/80 bg-zinc-900/20 hover:bg-zinc-900/60 hover:border-amber-500/30 p-5 rounded-xl transition-all"
+      >
+        <div class="flex items-center justify-between mb-1.5">
+          <h2 class="text-sm font-semibold text-zinc-200 group-hover:text-amber-300 transition-colors flex items-center gap-2">
+            <span>Gestión de Vocabulario Pasivo</span>
+            <span class="text-zinc-500 group-hover:translate-x-0.5 transition-transform">&rarr;</span>
+          </h2>
+          <span class="text-[11px] font-mono text-amber-400/80 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+            {stats.passiveCount} palabras
+          </span>
+        </div>
+        <p class="text-xs text-zinc-400 leading-relaxed">
+          Importa listas multilínea o sube archivos CSV con fechas históricas para registrar palabras que reconoces al leer o escuchar.
+        </p>
+      </a>
+    </div>
   </div>
 </Layout>
