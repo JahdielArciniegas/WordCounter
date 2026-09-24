@@ -1,13 +1,11 @@
-import React, { useState, useEffect, useTransition } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Upload,
-  FileText,
   Search,
   CheckCircle2,
   AlertCircle,
   RefreshCw,
   X,
-  Filter,
   Trash2,
 } from "lucide-react";
 
@@ -84,6 +82,13 @@ export const PassiveWordsManager: React.FC<PassiveWordsManagerProps> = ({
   };
 
   const handleClearAll = async () => {
+    if (
+      !window.confirm(
+        "¿Estás seguro de que deseas eliminar todas las palabras pasivas? Esta acción no se puede deshacer.",
+      )
+    ) {
+      return;
+    }
     setLoading(true);
     try {
       const res = await fetch("/api/passive/words", {
@@ -111,9 +116,9 @@ export const PassiveWordsManager: React.FC<PassiveWordsManagerProps> = ({
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const handleTextImport = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!textInput.trim()) return;
+  const handleTextImport = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!textInput.trim() || submitting) return;
 
     setSubmitting(true);
     setFeedback(null);
@@ -153,7 +158,7 @@ export const PassiveWordsManager: React.FC<PassiveWordsManagerProps> = ({
 
   const handleCsvImport = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!csvFile) return;
+    if (!csvFile || submitting) return;
 
     setSubmitting(true);
     setFeedback(null);
@@ -194,30 +199,45 @@ export const PassiveWordsManager: React.FC<PassiveWordsManagerProps> = ({
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+      e.preventDefault();
+      handleTextImport();
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Controls Header */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
         {/* Search Bar */}
-        <div className="relative flex-1 max-w-md">
-          <Search className="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
+        <div className="relative flex-1 max-w-sm">
+          <Search className="w-3.5 h-3.5 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             placeholder="Buscar palabra pasiva..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-zinc-900 border border-zinc-800 rounded-lg pl-9 pr-4 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-amber-500/60 focus:ring-1 focus:ring-amber-500/60 transition-all"
+            className="w-full bg-zinc-900/60 border border-zinc-800 rounded-lg pl-8.5 pr-8 py-1.5 text-xs text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-amber-500/60 focus:ring-1 focus:ring-amber-500/60 transition-all font-sans"
           />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
+            >
+              <X className="w-3 h-3" />
+            </button>
+          )}
         </div>
 
         {/* Sort & Actions */}
-        <div className="flex items-center gap-3">
-          <div className="flex items-center bg-zinc-900 border border-zinc-800 rounded-lg p-1 text-xs">
+        <div className="flex items-center gap-2">
+          <div className="flex items-center bg-zinc-900/80 border border-zinc-800/80 rounded-lg p-0.5 text-xs">
             <button
               onClick={() => setSortBy("date_desc")}
-              className={`px-2.5 py-1 rounded transition-colors ${
+              className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all ${
                 sortBy === "date_desc"
-                  ? "bg-zinc-800 text-amber-300 font-medium"
+                  ? "bg-zinc-800 text-amber-300 border border-zinc-700/60 shadow-xs"
                   : "text-zinc-400 hover:text-zinc-200"
               }`}
             >
@@ -225,9 +245,9 @@ export const PassiveWordsManager: React.FC<PassiveWordsManagerProps> = ({
             </button>
             <button
               onClick={() => setSortBy("alpha")}
-              className={`px-2.5 py-1 rounded transition-colors ${
+              className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all ${
                 sortBy === "alpha"
-                  ? "bg-zinc-800 text-amber-300 font-medium"
+                  ? "bg-zinc-800 text-amber-300 border border-zinc-700/60 shadow-xs"
                   : "text-zinc-400 hover:text-zinc-200"
               }`}
             >
@@ -240,24 +260,26 @@ export const PassiveWordsManager: React.FC<PassiveWordsManagerProps> = ({
               setIsModalOpen(true);
               setFeedback(null);
             }}
-            className="flex items-center space-x-2 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-medium px-4 py-2 rounded-lg text-sm transition-colors shadow-sm shadow-amber-500/10"
+            className="flex items-center space-x-1.5 bg-amber-500 hover:bg-amber-400 text-amber-950 font-semibold px-3.5 py-1.5 rounded-lg text-xs transition-colors shadow-xs"
           >
-            <Upload className="w-4 h-4" />
-            <span>Importar Palabras</span>
+            <Upload className="w-3.5 h-3.5" />
+            <span>Importar</span>
           </button>
+
           <button
-            onClick={() => handleClearAll()}
-            className="text-zinc-400 hover:text-red-400 transition-colors"
+            onClick={handleClearAll}
+            title="Limpiar todas las palabras pasivas"
+            className="p-1.5 rounded-lg border border-zinc-800 bg-zinc-900/40 text-zinc-500 hover:text-red-400 hover:border-red-900/40 transition-colors"
           >
-            <Trash2 className="w-4 h-4" />
+            <Trash2 className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
 
       {/* Words Table */}
-      <div className="border border-zinc-800 rounded-xl overflow-hidden bg-zinc-900/30">
-        <div className="p-4 border-b border-zinc-800 flex justify-between items-center text-xs text-zinc-400 bg-zinc-900/50">
-          <span>{total} palabras encontradas</span>
+      <div className="border border-zinc-800/80 rounded-xl overflow-hidden bg-zinc-900/20">
+        <div className="p-3 px-4 border-b border-zinc-800/60 flex justify-between items-center text-[11px] font-mono text-zinc-400 bg-zinc-900/40">
+          <span>{total} palabras registradas</span>
           {loading && (
             <span className="flex items-center text-zinc-500 gap-1.5">
               <RefreshCw className="w-3 h-3 animate-spin" /> Actualizando...
@@ -265,37 +287,44 @@ export const PassiveWordsManager: React.FC<PassiveWordsManagerProps> = ({
           )}
         </div>
 
-        <div className="divide-y divide-zinc-800/60 max-h-137.5 overflow-y-auto">
+        <div className="divide-y divide-zinc-800/50 max-h-120 overflow-y-auto">
           {words.length === 0 ? (
-            <div className="p-12 text-center">
-              <p className="text-zinc-400 text-sm font-medium">
+            <div className="p-12 text-center space-y-1">
+              <p className="text-zinc-400 text-xs font-medium">
                 No se encontraron palabras pasivas
               </p>
-              <p className="text-zinc-600 text-xs mt-1">
+              <p className="text-zinc-600 text-[11px]">
                 {searchQuery
                   ? "Prueba con otro término de búsqueda."
-                  : 'Haz clic en "Importar Palabras" para comenzar.'}
+                  : 'Haz clic en "Importar" para agregar tu primer listado.'}
               </p>
             </div>
           ) : (
             words.map((item) => (
               <div
                 key={item.id}
-                className="p-3.5 px-5 flex items-center justify-between hover:bg-zinc-800/20 transition-colors"
+                className="p-3 px-4 flex items-center justify-between hover:bg-zinc-800/25 transition-colors group"
               >
-                <span className="font-medium text-sm text-zinc-200">
-                  {item.word}
-                </span>
-                <span className="text-xs font-mono text-zinc-500">
+                <div className="flex items-center space-x-3">
+                  <span className="font-medium text-xs sm:text-sm text-zinc-200">
+                    {item.word}
+                  </span>
+                  <button
+                    onClick={() => handleDeleteWord(item.id)}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity text-zinc-500 hover:text-red-400"
+                    title="Eliminar palabra"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </button>
+                </div>
+
+                <span className="text-[11px] font-mono text-zinc-500">
                   {new Date(item.addedAt).toLocaleDateString("es-ES", {
                     year: "numeric",
                     month: "short",
                     day: "numeric",
                   })}
                 </span>
-                <button onClick={() => handleDeleteWord(item.id)}>
-                  <Trash2 className="w-3 h-3 text-zinc-400 hover:text-red-400" />
-                </button>
               </div>
             ))
           )}
@@ -304,29 +333,29 @@ export const PassiveWordsManager: React.FC<PassiveWordsManagerProps> = ({
 
       {/* Import Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl max-w-lg w-full p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
-              <h3 className="font-semibold text-zinc-100 text-base flex items-center gap-2">
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-[#121214] border border-zinc-800 rounded-xl max-w-lg w-full p-5 sm:p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between border-b border-zinc-800/80 pb-3">
+              <h3 className="font-semibold text-zinc-100 text-sm flex items-center gap-2">
                 <Upload className="w-4 h-4 text-amber-400" />
-                Importar Vocabulario Pasivo
+                <span>Importar Vocabulario Pasivo</span>
               </h3>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="text-zinc-400 hover:text-zinc-200 p-1 rounded-md"
+                className="text-zinc-400 hover:text-zinc-200 p-1 rounded-md transition-colors"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* Tabs */}
-            <div className="flex border-b border-zinc-800 text-sm">
+            <div className="flex border-b border-zinc-800 text-xs">
               <button
                 onClick={() => {
                   setActiveTab("text");
                   setFeedback(null);
                 }}
-                className={`flex-1 pb-2.5 font-medium border-b-2 text-center transition-colors ${
+                className={`flex-1 pb-2 font-medium border-b-2 text-center transition-colors ${
                   activeTab === "text"
                     ? "border-amber-400 text-amber-300"
                     : "border-transparent text-zinc-400 hover:text-zinc-200"
@@ -339,7 +368,7 @@ export const PassiveWordsManager: React.FC<PassiveWordsManagerProps> = ({
                   setActiveTab("csv");
                   setFeedback(null);
                 }}
-                className={`flex-1 pb-2.5 font-medium border-b-2 text-center transition-colors ${
+                className={`flex-1 pb-2 font-medium border-b-2 text-center transition-colors ${
                   activeTab === "csv"
                     ? "border-amber-400 text-amber-300"
                     : "border-transparent text-zinc-400 hover:text-zinc-200"
@@ -354,14 +383,14 @@ export const PassiveWordsManager: React.FC<PassiveWordsManagerProps> = ({
               <div
                 className={`p-3 rounded-lg text-xs flex items-start space-x-2 border ${
                   feedback.type === "success"
-                    ? "bg-emerald-950/40 border-emerald-800/60 text-emerald-300"
-                    : "bg-red-950/40 border-red-800/60 text-red-300"
+                    ? "bg-emerald-950/30 border-emerald-800/50 text-emerald-300"
+                    : "bg-red-950/30 border-red-800/50 text-red-300"
                 }`}
               >
                 {feedback.type === "success" ? (
-                  <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0" />
+                  <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0 text-emerald-400" />
                 ) : (
-                  <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+                  <AlertCircle className="w-4 h-4 mt-0.5 shrink-0 text-red-400" />
                 )}
                 <span>{feedback.message}</span>
               </div>
@@ -369,36 +398,37 @@ export const PassiveWordsManager: React.FC<PassiveWordsManagerProps> = ({
 
             {/* Tab 1: Multiline Text */}
             {activeTab === "text" && (
-              <form onSubmit={handleTextImport} className="space-y-4">
+              <form onSubmit={handleTextImport} className="space-y-3">
                 <div>
                   <label className="block text-xs text-zinc-400 mb-1.5 font-medium">
-                    Pega tu lista de palabras (una por línea):
+                    Lista de palabras (una por línea):
                   </label>
                   <textarea
                     rows={6}
                     value={textInput}
                     onChange={(e) => setTextInput(e.target.value)}
+                    onKeyDown={handleKeyDown}
                     placeholder="efímero&#10;resiliencia&#10;serendipia&#10;ataraxia"
-                    className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-amber-500/60 focus:ring-1 focus:ring-amber-500/60 font-mono"
+                    className="w-full bg-[#09090b] border border-zinc-800 rounded-lg p-3 text-xs sm:text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-amber-500/60 focus:ring-1 focus:ring-amber-500/60 font-mono"
                   />
-                  <p className="text-xs text-zinc-500 mt-1">
-                    No incluyas traducción. La fecha registrada será hoy. Los
-                    duplicados se ignoran.
-                  </p>
+                  <div className="flex items-center justify-between text-[11px] text-zinc-500 mt-1 font-mono">
+                    <span>Duplicados ignorados automáticamente</span>
+                    <span className="hidden sm:inline">⌘↵ para enviar</span>
+                  </div>
                 </div>
 
-                <div className="flex justify-end gap-2 pt-2">
+                <div className="flex justify-end gap-2 pt-2 border-t border-zinc-800/60">
                   <button
                     type="button"
                     onClick={() => setIsModalOpen(false)}
-                    className="px-4 py-2 rounded-lg text-xs font-medium text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
+                    className="px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/60 transition-colors"
                   >
                     Cerrar
                   </button>
                   <button
                     type="submit"
                     disabled={submitting || !textInput.trim()}
-                    className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-zinc-950 font-medium px-4 py-2 rounded-lg text-xs transition-colors"
+                    className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-amber-950 font-semibold px-3.5 py-1.5 rounded-lg text-xs transition-colors shadow-xs"
                   >
                     {submitting && (
                       <RefreshCw className="w-3.5 h-3.5 animate-spin" />
@@ -413,36 +443,34 @@ export const PassiveWordsManager: React.FC<PassiveWordsManagerProps> = ({
 
             {/* Tab 2: CSV Upload */}
             {activeTab === "csv" && (
-              <form onSubmit={handleCsvImport} className="space-y-4">
+              <form onSubmit={handleCsvImport} className="space-y-3">
                 <div>
                   <label className="block text-xs text-zinc-400 mb-1.5 font-medium">
-                    Selecciona o arrastra un archivo .csv:
+                    Selecciona un archivo .csv:
                   </label>
                   <input
                     type="file"
                     accept=".csv,text/csv"
                     onChange={(e) => setCsvFile(e.target.files?.[0] || null)}
-                    className="w-full text-xs text-zinc-400 file:mr-3 file:py-2 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-zinc-800 file:text-zinc-200 hover:file:bg-zinc-700 cursor-pointer bg-zinc-950 border border-zinc-800 p-2 rounded-lg"
+                    className="w-full text-xs text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-zinc-800 file:text-zinc-200 hover:file:bg-zinc-700 cursor-pointer bg-[#09090b] border border-zinc-800 p-2 rounded-lg"
                   />
-                  <p className="text-xs text-zinc-500 mt-1">
-                    Formato compatible: encabezado "word,date" o simplemente una
-                    columna con palabras. Si incluye columna de fecha, se
-                    preservará.
+                  <p className="text-[11px] text-zinc-500 mt-1 font-mono">
+                    Columnas soportadas: "word", "date" (opcional). Las fechas históricas serán preservadas.
                   </p>
                 </div>
 
-                <div className="flex justify-end gap-2 pt-2">
+                <div className="flex justify-end gap-2 pt-2 border-t border-zinc-800/60">
                   <button
                     type="button"
                     onClick={() => setIsModalOpen(false)}
-                    className="px-4 py-2 rounded-lg text-xs font-medium text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
+                    className="px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/60 transition-colors"
                   >
                     Cerrar
                   </button>
                   <button
                     type="submit"
                     disabled={submitting || !csvFile}
-                    className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-zinc-950 font-medium px-4 py-2 rounded-lg text-xs transition-colors"
+                    className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-amber-950 font-semibold px-3.5 py-1.5 rounded-lg text-xs transition-colors shadow-xs"
                   >
                     {submitting && (
                       <RefreshCw className="w-3.5 h-3.5 animate-spin" />
