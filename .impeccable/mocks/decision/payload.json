@@ -1,0 +1,97 @@
+{
+  "title": "Choose the visual world for WordCounter",
+  "question": "The roll assigned the Compositor's Type Case. Keep it, take an alternate, or re-roll.",
+  "options": [
+    {
+      "id": "assigned",
+      "label": "Compositor's Type Case",
+      "kicker": "THE ROLL",
+      "lineage": "Wooden California job case of movable type, where each letter occupies a cell sized by its frequency",
+      "thesis": "Your vocabulary is living type: each word occupies a cell sized by how often you set it, and the case fills as you write.",
+      "palette": ["#1a1410", "#e8dcc8", "#c4513a", "#2c5f4a"],
+      "materials": ["oak woodgrain", "brass fittings", "letterpress ink", "laid paper"],
+      "viewport": "A warm dark oak surface with the type case as the primary composition — cells holding words at frequency-proportional sizes, a brass-ruled ingestion area at the top where new text enters the case.",
+      "risk": "Reads craft-nostalgic when the woodgrain dominates over function.",
+      "raised": [
+        {
+          "from": "night-flight-six-pack",
+          "raise": "Cross-check discipline: every metric agrees with every other at a glance, no gauge contradicts its neighbor."
+        },
+        {
+          "from": "cracktro-scroller",
+          "raise": "Depth as rank: the most-used words burn brightest, the least-used recede into the grain, no enclosure needed."
+        }
+      ],
+      "comp": ".impeccable/mocks/decision/assigned.png",
+      "board": null,
+      "hero": null
+    },
+    {
+      "id": "model-pick",
+      "label": "Laboratory Logbook",
+      "kicker": "IMPECCABLE'S PICK",
+      "lineage": "Bound scientific observation journal with graph paper, timestamped data tables, and running totals",
+      "thesis": "Your vocabulary is an empirical record: every ingestion is a dated observation, every word a specimen with a frequency measurement.",
+      "palette": ["#0f1218", "#e2ddd4", "#3366cc", "#d4483b"],
+      "materials": ["graph paper grid", "fountain pen ink", "bound spine cloth", "lab-ruled tables"],
+      "viewport": "A dark lab bench surface, the logbook open to today's page — a graph-paper grid backing the ingestion form at top, tabulated word observations below with running frequency columns, a red pen annotation system for first-use markers.",
+      "risk": "This is familiar territory — the direction most runs in a measurement category land on.",
+      "comp": ".impeccable/mocks/decision/model-pick.png"
+    },
+    {
+      "id": "challenger-transit",
+      "label": "Midnight Transit Diagram",
+      "verdict": "competitive",
+      "lineage": "Metropolitan rail map fired as midnight-blue enamel mural",
+      "thesis": "Your vocabulary is a transit network: each word is a station, usage frequency is the line that connects them, and ingestion dates are interchange points.",
+      "palette": ["#0B1230", "#FFFFFF", "#E21D2D", "#1E5BFF", "#FFC20E", "#22B14C"],
+      "materials": ["midnight enamel ground", "porcelain white ticks", "scarlet and cobalt line inks"],
+      "viewport": "Midnight-blue enamel ground with word-stations connected by colored frequency lines, interchange circles where active and passive vocabularies meet, a station-search input at top.",
+      "case": "Strong audience identification — learners already think in routes and connections between words. Loses on product clarity: the transit metaphor obscures the core frequency measurement.",
+      "risk": "The transit metaphor carries connections but WordCounter measures frequency, not relationships.",
+      "comp": ".impeccable/mocks/decision/challenger-transit.png",
+      "hero": "https://impeccable.style/worlds/cards/wayfinding-cartography-signage-midnight-transit-diagram-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/wayfinding-cartography-signage-midnight-transit-diagram.webp"
+    },
+    {
+      "id": "challenger-cracktro",
+      "label": "Cracktro Scroller Queue",
+      "verdict": "declined",
+      "lineage": "Cracktro title screen with bitmap face over emissive black void, parallax dust fields, no enclosure",
+      "palette": ["#000000", "#1A1A1A", "#4A4A4A", "#E6E2D6", "#FFB000"],
+      "materials": ["emissive void", "dust field parallax", "bitmap face", "signal amber"],
+      "case": "Deeply committed system but language learners do not identify with demoscene culture. The void is dramatic but hides the measurement clarity this product needs.",
+      "kept": "Depth as rank — brightness and spacing encode frequency without boxes or borders.",
+      "hero": "https://impeccable.style/worlds/cards/operate-c-cracktro-scroller-queue-hero.webp"
+    },
+    {
+      "id": "challenger-sixpack",
+      "label": "Night Flight Six-Pack",
+      "verdict": "declined",
+      "lineage": "Small aircraft night instrument panel — six luminous gauges for cross-check trust",
+      "palette": ["#0B0D0F", "#0F1114", "#F2F5F5", "#7CFF9E", "#FFB000", "#FF3B30"],
+      "materials": ["matte black panel", "luminous white markings", "radium green needles", "satin bezel"],
+      "case": "The cross-check metaphor is powerful for a measurement tool, but the aviation world is foreign to language learners. Gauges work for 6 values, not 500+ words.",
+      "kept": "Cross-check scan discipline — every metric visible and in agreement at one sweep.",
+      "hero": "https://impeccable.style/worlds/cards/signals-instruments-night-flight-six-pack-hero.webp"
+    }
+  ],
+  "reroll": {
+    "registers": ["safer", "bolder"]
+  },
+  "buildPath": {
+    "value": "comp",
+    "toggle": true
+  },
+  "canon": true,
+  "canonCard": {
+    "label": "The category standard",
+    "thesis": "Dark dashboard with indigo/emerald accent cards, zinc surfaces, and a data table — what every vocabulary tracker ships.",
+    "palette": ["#09090b", "#f4f4f5", "#6366f1", "#34d399"],
+    "materials": ["zinc surfaces", "glass blur", "rounded cards", "icon badges"],
+    "viewport": "The arrangement a visitor expects: metric cards at top, text area in the middle, sortable word table below. Full craft, zero surprise.",
+    "risk": "Indistinguishable from the current WordCounter and every other dark-theme dashboard.",
+    "comp": ".impeccable/mocks/decision/canon.png"
+  },
+  "steer": true
+}
