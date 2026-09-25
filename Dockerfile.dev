@@ -1,0 +1,26 @@
+FROM node:24-bookworm-slim
+
+WORKDIR /app
+
+# Install build dependencies for better-sqlite3 native C++ addon
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 \
+    make \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN npm install -g pnpm@11.24.0
+
+# Pre-install dependencies inside container image
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml* ./
+RUN pnpm install
+
+# Ensure directory for SQLite database storage
+RUN mkdir -p /data
+
+ENV HOST=0.0.0.0
+ENV PORT=4321
+
+EXPOSE 4321
+
+CMD ["pnpm", "dev", "--host", "0.0.0.0"]

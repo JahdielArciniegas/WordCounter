@@ -1,0 +1,23 @@
+services:
+  wordcounter-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: wordcounter-dev
+    restart: unless-stopped
+    ports:
+      - "4321:4321"
+    environment:
+      - NODE_ENV=development
+      - HOST=0.0.0.0
+      - PORT=4321
+      - DB_PATH=/data/wordcounter-dev.db
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - wordcounter-dev-data:/data
+    command: pnpm dev --host 0.0.0.0
+
+volumes:
+  wordcounter-dev-data:
+    name: wordcounter-dev-data

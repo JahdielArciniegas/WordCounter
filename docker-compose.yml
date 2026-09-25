@@ -1,0 +1,20 @@
+services:
+  wordcounter:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: wordcounter-app
+    restart: unless-stopped
+    ports:
+      - "4321:4321"
+    environment:
+      - NODE_ENV=production
+      - HOST=0.0.0.0
+      - PORT=4321
+      - DB_PATH=/data/wordcounter.db
+    volumes:
+      - wordcounter-data:/data
+
+volumes:
+  wordcounter-data:
+    name: wordcounter-data
