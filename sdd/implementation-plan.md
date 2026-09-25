@@ -89,3 +89,29 @@
      - Ingesting text with an intermediate date preserves both boundaries while accumulating `occurrences`.
      - Sorting by `first_used_desc` returns words ordered by earliest usage.
 - **Verification Gate**: Vitest test suite passes with 100% of new temporal boundary and sorting tests passing cleanly.
+
+---
+
+### Phase 8: Dockerization & Containerized Environments (Dev & Prod)
+- **Goal**: Provide containerized workflows for both local development (hot-reload, volume mounts) and production testing (multi-stage build, lightweight runtime, persistent SQLite storage) allowing anyone to run WordCounter locally without configuring host Node or toolchains.
+- **Tasks**:
+  1. Create `.dockerignore` excluding `node_modules`, `dist`, `.astro`, `*.db*`, and local caches.
+  2. Create `Dockerfile` (multi-stage production image: build stage with native compile tools for `better-sqlite3`, slim production runner executing standalone Astro server).
+  3. Create `Dockerfile.dev` (development image with pnpm and live dev server on `0.0.0.0:4321`).
+  4. Create `docker-compose.yml` (production service definition with persistent volume for `/data/wordcounter.db` and port 4321).
+  5. Create `docker-compose.dev.yml` (development service definition with source bind mount, node_modules volume, and hot reload).
+- **Verification Gate**: Container builds cleanly, serves application on port 4321, and SQLite database persists across container restarts.
+
+---
+
+### Phase 9: Comprehensive Project Documentation & README
+- **Goal**: Author a complete, professional `README.md` that introduces WordCounter, documents the linguistic acquisition model (active vs. passive vocabulary), and provides clear step-by-step instructions for running locally (pnpm) and containerized (Docker).
+- **Tasks**:
+  1. Project Overview & Philosophy: Quantitative linguistic measurement, active vs. passive vocabulary theory, local-first privacy.
+  2. Tech Stack Summary: Astro SSR, React islands, Drizzle ORM, better-sqlite3, Tailwind CSS v4, Vitest.
+  3. Prerequisites & Native Setup: Instructions for Node 24+, pnpm, installation, running tests, dev server, and build.
+  4. Docker Usage Guide: Explicit commands for development (`docker compose -f docker-compose.dev.yml up`) and production (`docker compose up -d`).
+  5. Feature Guide: Text tokenization with date tracking, CSV format specifications, ratio analytics.
+  6. Project Structure & Architecture overview.
+- **Verification Gate**: Markdown renders cleanly, all documented commands execute without errors, and setup steps tested.
+
