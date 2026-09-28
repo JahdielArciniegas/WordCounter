@@ -16,6 +16,8 @@ services:
       - .:/app
       - /app/node_modules
       - wordcounter-dev-data:/data
+    stdin_open: true
+    tty: true
     command: pnpm dev --host 0.0.0.0
 
 volumes:
