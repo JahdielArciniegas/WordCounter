@@ -1,6 +1,7 @@
 import { getDatabase } from "../db";
 import { passiveWords, type PassiveWord } from "../db/schema";
 import { parseWordsCsv } from "./csv-parser";
+import { lexicalValidatorService } from "./lexical-validator.service";
 import { like, eq, and, desc, asc, sql } from "drizzle-orm";
 import type Database from "better-sqlite3";
 
@@ -8,6 +9,8 @@ export interface ImportSummary {
   totalProcessed: number;
   insertedCount: number;
   skippedCount: number;
+  discardedCount: number;
+  discardedWords: string[];
 }
 
 export interface GetPassiveOptions {
@@ -36,7 +39,13 @@ export class PassiveVocabService {
     const { sqlite } = this.getDb(conn);
 
     if (!text || typeof text !== "string") {
-      return { totalProcessed: 0, insertedCount: 0, skippedCount: 0 };
+      return {
+        totalProcessed: 0,
+        insertedCount: 0,
+        skippedCount: 0,
+        discardedCount: 0,
+        discardedWords: [],
+      };
     }
 
     const lines = text
@@ -45,7 +54,28 @@ export class PassiveVocabService {
       .filter((w) => w.length > 0);
 
     if (lines.length === 0) {
-      return { totalProcessed: 0, insertedCount: 0, skippedCount: 0 };
+      return {
+        totalProcessed: 0,
+        insertedCount: 0,
+        skippedCount: 0,
+        discardedCount: 0,
+        discardedWords: [],
+      };
+    }
+
+    // Filter valid lexical words using morphological dictionary
+    const { valid: validWords, discarded: discardedWords } =
+      lexicalValidatorService.filterValidWords(lines, language);
+    const uniqueDiscarded = Array.from(new Set(discardedWords));
+
+    if (validWords.length === 0) {
+      return {
+        totalProcessed: lines.length,
+        insertedCount: 0,
+        skippedCount: 0,
+        discardedCount: discardedWords.length,
+        discardedWords: uniqueDiscarded,
+      };
     }
 
     const insertStmt = sqlite.prepare(`
@@ -63,12 +93,14 @@ export class PassiveVocabService {
       }
     });
 
-    runTransaction(lines);
+    runTransaction(validWords);
 
     return {
       totalProcessed: lines.length,
       insertedCount: inserted,
-      skippedCount: lines.length - inserted,
+      skippedCount: validWords.length - inserted,
+      discardedCount: discardedWords.length,
+      discardedWords: uniqueDiscarded,
     };
   }
 
@@ -85,7 +117,38 @@ export class PassiveVocabService {
     const parsed = parseWordsCsv(csvContent);
 
     if (parsed.length === 0) {
-      return { totalProcessed: 0, insertedCount: 0, skippedCount: 0 };
+      return {
+        totalProcessed: 0,
+        insertedCount: 0,
+        skippedCount: 0,
+        discardedCount: 0,
+        discardedWords: [],
+      };
+    }
+
+    const validItems: typeof parsed = [];
+    const discardedWords: string[] = [];
+
+    for (const item of parsed) {
+      if (lexicalValidatorService.isValidWord(item.word, language)) {
+        validItems.push({
+          ...item,
+          word: item.word.toLowerCase().trim(),
+        });
+      } else {
+        discardedWords.push(item.word);
+      }
+    }
+    const uniqueDiscarded = Array.from(new Set(discardedWords));
+
+    if (validItems.length === 0) {
+      return {
+        totalProcessed: parsed.length,
+        insertedCount: 0,
+        skippedCount: 0,
+        discardedCount: discardedWords.length,
+        discardedWords: uniqueDiscarded,
+      };
     }
 
     const insertWithDateStmt = sqlite.prepare(`
@@ -114,12 +177,14 @@ export class PassiveVocabService {
       }
     });
 
-    runTransaction(parsed);
+    runTransaction(validItems);
 
     return {
       totalProcessed: parsed.length,
       insertedCount: inserted,
-      skippedCount: parsed.length - inserted,
+      skippedCount: validItems.length - inserted,
+      discardedCount: discardedWords.length,
+      discardedWords: uniqueDiscarded,
     };
   }
 

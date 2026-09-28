@@ -1,6 +1,7 @@
 import { getDatabase } from "../db";
 import { activeWords, passiveWords, type ActiveWord } from "../db/schema";
 import { tokenizeText, type TokenFrequency } from "./tokenizer";
+import { lexicalValidatorService } from "./lexical-validator.service";
 import { like, eq, and, desc, asc, sql } from "drizzle-orm";
 import type Database from "better-sqlite3";
 
@@ -10,6 +11,8 @@ export interface ActiveAnalysisSummary {
   newWordsCount: number;
   updatedWordsCount: number;
   topWords: TokenFrequency[];
+  discardedCount: number;
+  discardedWords: string[];
 }
 
 export interface GetActiveOptions {
@@ -76,8 +79,36 @@ export class ActiveVocabService {
         newWordsCount: 0,
         updatedWordsCount: 0,
         topWords: [],
+        discardedCount: 0,
+        discardedWords: [],
       };
     }
+
+    // Filter valid lexical words using morphological dictionary
+    const { valid: validTokens, discarded: discardedTokens } =
+      lexicalValidatorService.filterValidWords(tokenized.tokens, language);
+    const uniqueDiscarded = Array.from(new Set(discardedTokens));
+
+    if (validTokens.length === 0) {
+      return {
+        tokensAnalyzed: tokenized.totalTokens,
+        uniqueWords: 0,
+        newWordsCount: 0,
+        updatedWordsCount: 0,
+        topWords: [],
+        discardedCount: discardedTokens.length,
+        discardedWords: uniqueDiscarded,
+      };
+    }
+
+    const frequencyMap = new Map<string, number>();
+    for (const token of validTokens) {
+      frequencyMap.set(token, (frequencyMap.get(token) || 0) + 1);
+    }
+
+    const validFrequencies: TokenFrequency[] = Array.from(frequencyMap.entries())
+      .map(([word, count]) => ({ word, count }))
+      .sort((a, b) => b.count - a.count || a.word.localeCompare(b.word));
 
     let timestampInSeconds: number;
     if (!customDate) {
@@ -142,14 +173,16 @@ export class ActiveVocabService {
       },
     );
 
-    runTransaction(tokenized.frequencies);
+    runTransaction(validFrequencies);
 
     return {
       tokensAnalyzed: tokenized.totalTokens,
-      uniqueWords: tokenized.uniqueTokens,
+      uniqueWords: validFrequencies.length,
       newWordsCount: newCount,
       updatedWordsCount: updatedCount,
-      topWords: tokenized.frequencies.slice(0, 10),
+      topWords: validFrequencies.slice(0, 10),
+      discardedCount: discardedTokens.length,
+      discardedWords: uniqueDiscarded,
     };
   }
 

@@ -132,9 +132,13 @@ export const PassiveWordsManager: React.FC<PassiveWordsManagerProps> = ({
 
       const data = await res.json();
       if (res.ok && data.success) {
+        const discardedText =
+          data.discardedCount && data.discardedCount > 0
+            ? `, ${data.discardedCount} descartadas (no reconocidas por el diccionario)`
+            : "";
         setFeedback({
           type: "success",
-          message: `Importación completada: ${data.insertedCount} agregadas, ${data.skippedCount} omitidas (duplicadas).`,
+          message: `Importación completada: ${data.insertedCount} agregadas, ${data.skippedCount} omitidas (duplicadas)${discardedText}.`,
           inserted: data.insertedCount,
           skipped: data.skippedCount,
         });
@@ -175,9 +179,13 @@ export const PassiveWordsManager: React.FC<PassiveWordsManagerProps> = ({
 
       const data = await res.json();
       if (res.ok && data.success) {
+        const discardedText =
+          data.discardedCount && data.discardedCount > 0
+            ? `, ${data.discardedCount} descartadas (no reconocidas por el diccionario)`
+            : "";
         setFeedback({
           type: "success",
-          message: `CSV importado: ${data.insertedCount} agregadas, ${data.skippedCount} omitidas.`,
+          message: `CSV importado: ${data.insertedCount} agregadas, ${data.skippedCount} omitidas${discardedText}.`,
           inserted: data.insertedCount,
           skipped: data.skippedCount,
         });

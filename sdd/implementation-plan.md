@@ -115,3 +115,29 @@
   6. Project Structure & Architecture overview.
 - **Verification Gate**: Markdown renders cleanly, all documented commands execute without errors, and setup steps tested.
 
+---
+
+### Phase 10: Local Morphological Lexical Validation (ES & EN)
+- **Goal**: Provide offline, high-performance lexical validation using Hunspell-compatible morphological dictionaries (`n-spell` with `dictionary-es` and `dictionary-en`) to verify word existence before committing words to active or passive vocabulary, discarding invalid non-words, OCR noise, and typos while supporting natural inflections (conjugations, plurals, clitics).
+- **Tasks**:
+  1. Add dependencies: `n-spell`, `dictionary-es`, `dictionary-en` (and types if needed).
+  2. Implement `LexicalValidatorService` (`src/services/lexical-validator.service.ts`):
+     - Lazy-load and cache in-memory dictionary instances per language (`es` default, `en` supported).
+     - Provide `isValidWord(word: string, language?: string): boolean` method.
+     - Support batch filtering via `filterValidWords(words: string[], language?: string): { valid: string[]; discarded: string[] }`.
+  3. Integrate with Active Vocabulary ingestion:
+     - Update `ActiveVocabService.analyzeAndIngestText` to filter tokenized words through `LexicalValidatorService` before SQLite atomic upsert.
+     - Include discarded tokens in analysis response metadata (`discardedCount`, `discardedWords`).
+  4. Integrate with Passive Vocabulary ingestion:
+     - Update `PassiveVocabService.addWord` and `PassiveVocabService.importWords` to validate inputs before insertion.
+     - Idempotently discard invalid non-words and report counts in API responses.
+  5. UI Transparency & Feedback:
+     - Update `ActiveWordsManager.tsx` and `PassiveWordsManager.tsx` to display feedback when invalid tokens are discarded during text analysis or CSV batch import.
+  6. Automated Test Suite (`tests/services.test.ts`, `tests/api.test.ts`):
+     - Validate Spanish verb conjugations, irregular verbs, and plurals pass validation.
+     - Validate English inflections and plurals pass validation.
+     - Validate non-existent gibberish and typos are rejected.
+     - Validate end-to-end active analysis and passive import filter out invalid words.
+- **Verification Gate**: 100% of Vitest test suite passes, zero external network calls, in-memory validation throughput exceeds 50,000 words/second.
+
+

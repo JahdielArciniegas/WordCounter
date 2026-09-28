@@ -4,6 +4,7 @@ import { tokenizeText } from '../src/services/tokenizer';
 import { parseWordsCsv } from '../src/services/csv-parser';
 import { PassiveVocabService } from '../src/services/passive.service';
 import { ActiveVocabService } from '../src/services/active.service';
+import { lexicalValidatorService } from '../src/services/lexical-validator.service';
 
 describe('Core Domain Services (Phase 3)', () => {
   let conn: ReturnType<typeof getDatabase>;
@@ -233,5 +234,59 @@ describe('Core Domain Services (Phase 3)', () => {
       expect(date.getUTCMonth()).toBe(6); // 0-indexed: 6 = July
       expect(date.getUTCDate()).toBe(20);
     });
+
+    it('should discard invalid non-words and track discarded words count during analysis', () => {
+      const text = 'La arquitectura asdfgh limpia zzzzqqqq';
+      const summary = activeService.analyzeAndIngestText(text, 'es', conn);
+
+      expect(summary.tokensAnalyzed).toBe(5);
+      expect(summary.uniqueWords).toBe(3); // la, arquitectura, limpia
+      expect(summary.discardedCount).toBe(2);
+      expect(summary.discardedWords).toEqual(['asdfgh', 'zzzzqqqq']);
+
+      const items = activeService.getActiveWords({ language: 'es' }, conn).items;
+      const storedWords = items.map((i) => i.word);
+      expect(storedWords).toContain('arquitectura');
+      expect(storedWords).toContain('limpia');
+      expect(storedWords).not.toContain('asdfgh');
+      expect(storedWords).not.toContain('zzzzqqqq');
+    });
+  });
+
+  describe('LexicalValidatorService (Phase 10)', () => {
+    it('should validate inflected Spanish words (conjugations, plurals, clitics, accents)', () => {
+      expect(lexicalValidatorService.isValidWord('cantar', 'es')).toBe(true);
+      expect(lexicalValidatorService.isValidWord('cantábamos', 'es')).toBe(true);
+      expect(lexicalValidatorService.isValidWord('hubiéramos', 'es')).toBe(true);
+      expect(lexicalValidatorService.isValidWord('dímelo', 'es')).toBe(true);
+      expect(lexicalValidatorService.isValidWord('ciudades', 'es')).toBe(true);
+      expect(lexicalValidatorService.isValidWord('españa', 'es')).toBe(true);
+      expect(lexicalValidatorService.isValidWord('madrid', 'es')).toBe(true);
+    });
+
+    it('should validate inflected English words and contractions', () => {
+      expect(lexicalValidatorService.isValidWord('running', 'en')).toBe(true);
+      expect(lexicalValidatorService.isValidWord('children', 'en')).toBe(true);
+      expect(lexicalValidatorService.isValidWord('better', 'en')).toBe(true);
+      expect(lexicalValidatorService.isValidWord("don't", 'en')).toBe(true);
+      expect(lexicalValidatorService.isValidWord('well-being', 'en')).toBe(true);
+    });
+
+    it('should reject non-words, typos, and tokens with numbers', () => {
+      expect(lexicalValidatorService.isValidWord('asdfgh', 'es')).toBe(false);
+      expect(lexicalValidatorService.isValidWord('zzzzqqqq', 'es')).toBe(false);
+      expect(lexicalValidatorService.isValidWord('12345', 'es')).toBe(false);
+      expect(lexicalValidatorService.isValidWord('palabra123', 'es')).toBe(false);
+      expect(lexicalValidatorService.isValidWord('', 'es')).toBe(false);
+    });
+
+    it('should correctly filter batches of words into valid and discarded lists', () => {
+      const tokens = ['sol', 'luna', 'asdfgh', 'cielo', 'zzzzqqqq'];
+      const res = lexicalValidatorService.filterValidWords(tokens, 'es');
+
+      expect(res.valid).toEqual(['sol', 'luna', 'cielo']);
+      expect(res.discarded).toEqual(['asdfgh', 'zzzzqqqq']);
+    });
   });
 });
+

@@ -26,6 +26,8 @@ interface AnalysisSummary {
   newWordsCount: number;
   updatedWordsCount: number;
   topWords: { word: string; count: number }[];
+  discardedCount?: number;
+  discardedWords?: string[];
 }
 
 interface ActiveWordsManagerProps {
@@ -161,6 +163,8 @@ export const ActiveWordsManager: React.FC<ActiveWordsManagerProps> = ({
           newWordsCount: data.newWordsCount,
           updatedWordsCount: data.updatedWordsCount,
           topWords: data.topWords || [],
+          discardedCount: data.discardedCount,
+          discardedWords: data.discardedWords || [],
         });
         setTextInput(""); // Discard raw text immediately
         if (mode === "full") {
@@ -280,7 +284,13 @@ export const ActiveWordsManager: React.FC<ActiveWordsManagerProps> = ({
               </button>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-center font-mono">
+            <div
+              className={`grid grid-cols-2 ${
+                analysisResult.discardedCount && analysisResult.discardedCount > 0
+                  ? "sm:grid-cols-5"
+                  : "sm:grid-cols-4"
+              } gap-2.5 text-center font-mono`}
+            >
               <div className="bg-zinc-950/60 p-2.5 rounded-lg border border-zinc-800/80">
                 <div className="text-[11px] text-zinc-500">Tokens Totales</div>
                 <div className="text-base font-bold text-zinc-100">
@@ -305,7 +315,38 @@ export const ActiveWordsManager: React.FC<ActiveWordsManagerProps> = ({
                   {analysisResult.updatedWordsCount}
                 </div>
               </div>
+              {analysisResult.discardedCount !== undefined &&
+                analysisResult.discardedCount > 0 && (
+                  <div className="bg-zinc-950/60 p-2.5 rounded-lg border border-amber-900/40">
+                    <div className="text-[11px] text-amber-400">Descartadas</div>
+                    <div className="text-base font-bold text-amber-300">
+                      {analysisResult.discardedCount}
+                    </div>
+                  </div>
+                )}
             </div>
+
+            {analysisResult.discardedWords &&
+              analysisResult.discardedWords.length > 0 && (
+                <div className="pt-1 flex flex-wrap items-center gap-1.5 text-xs">
+                  <span className="text-[11px] font-mono text-amber-400/80 mr-1">
+                    Descartadas por el diccionario:
+                  </span>
+                  {analysisResult.discardedWords.slice(0, 8).map((w) => (
+                    <span
+                      key={w}
+                      className="inline-flex items-center px-1.5 py-0.5 rounded bg-zinc-900 text-zinc-400 border border-amber-900/40 line-through text-[11px] font-mono"
+                    >
+                      {w}
+                    </span>
+                  ))}
+                  {analysisResult.discardedWords.length > 8 && (
+                    <span className="text-[11px] font-mono text-zinc-500">
+                      +{analysisResult.discardedWords.length - 8} más
+                    </span>
+                  )}
+                </div>
+              )}
 
             {analysisResult.topWords.length > 0 && (
               <div className="pt-1 flex flex-wrap items-center gap-1.5 text-xs">

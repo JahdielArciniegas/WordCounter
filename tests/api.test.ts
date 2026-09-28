@@ -63,7 +63,7 @@ describe('Astro SSR API Routes (Phase 4)', () => {
       const req = new Request('http://localhost:4321/api/passive/import-text', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: "sol\nluna\nestralla\nsol", language: 'es' }),
+        body: JSON.stringify({ text: "sol\nluna\nestrella\nsol", language: 'es' }),
       });
       const ctx = createAstroContext(req, 'http://localhost:4321/api/passive/import-text');
       const res = await importTextRoute(ctx);
@@ -73,6 +73,23 @@ describe('Astro SSR API Routes (Phase 4)', () => {
       expect(json.success).toBe(true);
       expect(json.insertedCount).toBe(3);
       expect(json.skippedCount).toBe(1);
+    });
+
+    it('should discard invalid non-words during import-text (200)', async () => {
+      const req = new Request('http://localhost:4321/api/passive/import-text', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: "flor\nasdfgh\nsol", language: 'es' }),
+      });
+      const ctx = createAstroContext(req, 'http://localhost:4321/api/passive/import-text');
+      const res = await importTextRoute(ctx);
+      expect(res.status).toBe(200);
+
+      const json = await res.json();
+      expect(json.success).toBe(true);
+      expect(json.insertedCount).toBe(2);
+      expect(json.discardedCount).toBe(1);
+      expect(json.discardedWords).toEqual(['asdfgh']);
     });
   });
 
@@ -158,6 +175,25 @@ describe('Astro SSR API Routes (Phase 4)', () => {
       expect(json.newWordsCount).toBe(6);
     });
 
+    it('should discard invalid non-words and return discardedCount and discardedWords (200)', async () => {
+      const text = 'disciplina asdfgh constancia zzzzqqqq';
+      const req = new Request('http://localhost:4321/api/active/analyze-text', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, language: 'es' }),
+      });
+      const ctx = createAstroContext(req, 'http://localhost:4321/api/active/analyze-text');
+      const res = await analyzeTextRoute(ctx);
+      expect(res.status).toBe(200);
+
+      const json = await res.json();
+      expect(json.success).toBe(true);
+      expect(json.tokensAnalyzed).toBe(4);
+      expect(json.uniqueWords).toBe(2); // disciplina, constancia
+      expect(json.discardedCount).toBe(2);
+      expect(json.discardedWords).toEqual(['asdfgh', 'zzzzqqqq']);
+    });
+
     it('should ingest text with custom historical date and update boundaries', async () => {
       const date1 = '2023-05-10T00:00:00Z';
       const req1 = new Request('http://localhost:4321/api/active/analyze-text', {
@@ -197,7 +233,7 @@ describe('Astro SSR API Routes (Phase 4)', () => {
       const seedReq = new Request('http://localhost:4321/api/active/analyze-text', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: 'código limpio código limpio código reutilizable' }),
+        body: JSON.stringify({ text: 'código limpio código limpio código elegante' }),
       });
       await analyzeTextRoute(createAstroContext(seedReq, 'http://localhost:4321/api/active/analyze-text'));
 
