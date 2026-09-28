@@ -7,13 +7,13 @@ export const POST: APIRoute = async ({ request }) => {
   try {
     const contentType = request.headers.get('content-type') || '';
     let csvContent = '';
-    let language = 'es';
+    let language = 'en';
 
     if (contentType.includes('multipart/form-data')) {
       const formData = await request.formData();
       const file = formData.get('file');
       if (formData.has('language')) {
-        language = (formData.get('language') as string) || 'es';
+        language = (formData.get('language') as string) || 'en';
       }
 
       if (!file || !(file instanceof File)) {
@@ -27,7 +27,7 @@ export const POST: APIRoute = async ({ request }) => {
     } else if (contentType.includes('application/json')) {
       const body = await request.json();
       csvContent = body.csvContent || '';
-      language = body.language || 'es';
+      language = body.language || 'en';
     } else {
       csvContent = await request.text();
     }

@@ -6,7 +6,7 @@ export const passiveWords = sqliteTable(
   {
     id: integer('id').primaryKey({ autoIncrement: true }),
     word: text('word').notNull(),
-    language: text('language').notNull().default('es'),
+    language: text('language').notNull().default('en'),
     addedAt: integer('added_at', { mode: 'timestamp' })
       .notNull()
       .default(sql`(strftime('%s', 'now'))`),
@@ -21,7 +21,7 @@ export const activeWords = sqliteTable(
   {
     id: integer('id').primaryKey({ autoIncrement: true }),
     word: text('word').notNull(),
-    language: text('language').notNull().default('es'),
+    language: text('language').notNull().default('en'),
     occurrences: integer('occurrences').notNull().default(1),
     firstUsedAt: integer('first_used_at', { mode: 'timestamp' })
       .notNull()

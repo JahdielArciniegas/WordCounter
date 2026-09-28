@@ -5,7 +5,7 @@ import { activeVocabService } from '../services/active.service';
 
 export const prerender = false;
 
-const stats = activeVocabService.getStats('es');
+const stats = activeVocabService.getStats('en');
 const topActive = activeVocabService.getActiveWords({ limit: 14, sort: 'occurrences_desc' });
 
 const totalUnique = stats.activeCount + stats.passiveCount;

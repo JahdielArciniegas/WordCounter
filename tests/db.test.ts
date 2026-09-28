@@ -23,7 +23,7 @@ describe('Database Layer & Schema Constraints (Phase 2)', () => {
 
       expect(inserted).toBeDefined();
       expect(inserted.word).toBe('serendipia');
-      expect(inserted.language).toBe('es');
+      expect(inserted.language).toBe('en');
       expect(inserted.addedAt).toBeInstanceOf(Date);
     });
 
@@ -71,7 +71,7 @@ describe('Database Layer & Schema Constraints (Phase 2)', () => {
 
       expect(inserted).toBeDefined();
       expect(inserted.word).toBe('desarrollo');
-      expect(inserted.language).toBe('es');
+      expect(inserted.language).toBe('en');
       expect(inserted.occurrences).toBe(1);
       expect(inserted.firstUsedAt).toBeInstanceOf(Date);
       expect(inserted.lastUsedAt).toBeInstanceOf(Date);

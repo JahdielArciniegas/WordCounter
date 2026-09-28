@@ -7,13 +7,13 @@ export const POST: APIRoute = async ({ request }) => {
   try {
     const contentType = request.headers.get("content-type") || "";
     let text = "";
-    let language = "es";
+    let language = "en";
     let date: string | number | undefined = undefined;
 
     if (contentType.includes("application/json")) {
       const body = await request.json();
       text = body.text;
-      language = body.language || "es";
+      language = body.language || "en";
       date = body.date;
     } else {
       text = await request.text();

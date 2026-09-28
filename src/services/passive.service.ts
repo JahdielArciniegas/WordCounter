@@ -33,7 +33,7 @@ export class PassiveVocabService {
    */
   importFromText(
     text: string,
-    language: string = "es",
+    language: string = "en",
     conn?: { db: any; sqlite: Database.Database },
   ): ImportSummary {
     const { sqlite } = this.getDb(conn);
@@ -110,7 +110,7 @@ export class PassiveVocabService {
    */
   importFromCsv(
     csvContent: string,
-    language: string = "es",
+    language: string = "en",
     conn?: { db: any; sqlite: Database.Database },
   ): ImportSummary {
     const { sqlite } = this.getDb(conn);
@@ -196,7 +196,7 @@ export class PassiveVocabService {
     conn?: { db: any; sqlite: Database.Database },
   ): { items: PassiveWord[]; total: number } {
     const { db } = this.getDb(conn);
-    const language = options.language || "es";
+    const language = options.language || "en";
     const limit = options.limit || 50;
     const offset = options.offset || 0;
     const sort = options.sort || "date_desc";

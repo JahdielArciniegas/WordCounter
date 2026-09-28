@@ -11,7 +11,7 @@ export const SCHEMA_SQL = `
   CREATE TABLE IF NOT EXISTS passive_words (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     word TEXT NOT NULL,
-    language TEXT NOT NULL DEFAULT 'es',
+    language TEXT NOT NULL DEFAULT 'en',
     added_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
   );
   CREATE UNIQUE INDEX IF NOT EXISTS passive_word_lang_idx ON passive_words (word, language);
@@ -19,7 +19,7 @@ export const SCHEMA_SQL = `
   CREATE TABLE IF NOT EXISTS active_words (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     word TEXT NOT NULL,
-    language TEXT NOT NULL DEFAULT 'es',
+    language TEXT NOT NULL DEFAULT 'en',
     occurrences INTEGER NOT NULL DEFAULT 1,
     first_used_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
     last_used_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))

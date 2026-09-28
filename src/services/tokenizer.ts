@@ -14,7 +14,7 @@ export interface TokenizeResult {
  * Tokenize an arbitrary input string into clean lexical words and their frequency distribution.
  * Unicode-aware across languages: handles accents, apostrophes inside words, and strips surrounding punctuation.
  */
-export function tokenizeText(text: string, language: string = 'es'): TokenizeResult {
+export function tokenizeText(text: string, language: string = 'en'): TokenizeResult {
   if (!text || typeof text !== 'string') {
     return {
       tokens: [],

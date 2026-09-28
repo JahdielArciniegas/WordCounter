@@ -15,7 +15,7 @@ export const POST: APIRoute = async ({ request }) => {
 
     const body = await request.json();
     const text = body.text;
-    const language = body.language || 'es';
+    const language = body.language || 'en';
 
     if (!text || typeof text !== 'string' || text.trim().length === 0) {
       return new Response(

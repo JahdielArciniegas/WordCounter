@@ -10,8 +10,8 @@ export interface ValidationBatchResult {
 export class LexicalValidatorService {
   private instances = new Map<string, ReturnType<typeof nspell>>();
 
-  private getChecker(lang: string = 'es'): ReturnType<typeof nspell> | null {
-    const normalized = (lang || 'es').toLowerCase().trim();
+  private getChecker(lang: string = 'en'): ReturnType<typeof nspell> | null {
+    const normalized = (lang || 'en').toLowerCase().trim();
     if (this.instances.has(normalized)) {
       return this.instances.get(normalized)!;
     }
@@ -47,7 +47,7 @@ export class LexicalValidatorService {
    * - Common and irregular verb conjugations, plurals, clitics
    * - Standard hyphenated compounds (where each sub-word is valid)
    */
-  public isValidWord(rawWord: string, lang: string = 'es'): boolean {
+  public isValidWord(rawWord: string, lang: string = 'en'): boolean {
     if (!rawWord || typeof rawWord !== 'string') return false;
 
     // Normalize apostrophes and trim
@@ -93,7 +93,7 @@ export class LexicalValidatorService {
    */
   public filterValidWords(
     words: string[],
-    lang: string = 'es'
+    lang: string = 'en'
   ): ValidationBatchResult {
     const valid: string[] = [];
     const discarded: string[] = [];

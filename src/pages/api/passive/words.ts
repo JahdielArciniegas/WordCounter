@@ -6,7 +6,7 @@ export const prerender = false;
 export const GET: APIRoute = async ({ url }) => {
   try {
     const q = url.searchParams.get("q") || undefined;
-    const language = url.searchParams.get("language") || "es";
+    const language = url.searchParams.get("language") || "en";
     const limitParam = url.searchParams.get("limit");
     const offsetParam = url.searchParams.get("offset");
     const sortParam = url.searchParams.get("sort");

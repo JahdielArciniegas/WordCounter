@@ -127,7 +127,7 @@ export const PassiveWordsManager: React.FC<PassiveWordsManagerProps> = ({
       const res = await fetch("/api/passive/import-text", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: textInput, language: "es" }),
+        body: JSON.stringify({ text: textInput, language: "en" }),
       });
 
       const data = await res.json();
@@ -170,7 +170,7 @@ export const PassiveWordsManager: React.FC<PassiveWordsManagerProps> = ({
     try {
       const formData = new FormData();
       formData.append("file", csvFile);
-      formData.append("language", "es");
+      formData.append("language", "en");
 
       const res = await fetch("/api/passive/import-csv", {
         method: "POST",

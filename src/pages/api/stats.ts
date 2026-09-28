@@ -5,7 +5,7 @@ export const prerender = false;
 
 export const GET: APIRoute = async ({ url }) => {
   try {
-    const language = url.searchParams.get('language') || 'es';
+    const language = url.searchParams.get('language') || 'en';
     const stats = activeVocabService.getStats(language);
 
     return new Response(

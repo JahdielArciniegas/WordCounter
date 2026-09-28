@@ -47,7 +47,7 @@ export class ActiveVocabService {
    */
   analyzeAndIngestText(
     text: string,
-    language: string = "es",
+    language: string = "en",
     customDateOrConn?:
       | Date
       | string
@@ -194,7 +194,7 @@ export class ActiveVocabService {
     conn?: { db: any; sqlite: Database.Database },
   ): { items: ActiveWord[]; total: number } {
     const { db } = this.getDb(conn);
-    const language = options.language || "es";
+    const language = options.language || "en";
     const limit = options.limit || 50;
     const offset = options.offset || 0;
     const sort = options.sort || "occurrences_desc";
@@ -254,7 +254,7 @@ export class ActiveVocabService {
    * Get global counts and stats for active vs passive vocabulary.
    */
   getStats(
-    language: string = "es",
+    language: string = "en",
     conn?: { db: any; sqlite: Database.Database },
   ): OverallStats {
     const { db } = this.getDb(conn);

@@ -150,7 +150,7 @@ export const ActiveWordsManager: React.FC<ActiveWordsManagerProps> = ({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           text: textInput,
-          language: "es",
+          language: "en",
           date: dateInput || undefined,
         }),
       });
