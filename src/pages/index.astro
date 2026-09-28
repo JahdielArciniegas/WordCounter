@@ -107,11 +107,6 @@ const passivePercent = totalUnique > 0 ? 100 - activePercent : 0;
       </div>
     </div>
 
-    <!-- Direct In-Memory Text Analysis (First Viewport contract promise) -->
-    <div class="space-y-2">
-      <ActiveWordsManager client:load mode="analyzer-only" />
-    </div>
-
     <!-- Top Words Frequency Cloud (Relocated right below active analysis area) -->
     {
       topActive.items.length > 0 && (
