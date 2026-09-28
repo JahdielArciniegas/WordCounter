@@ -1,58 +1,62 @@
 # WordCounter
 
-> **Quantitative lexical measurement and vocabulary acquisition tracker.**  
-> Distinguish passive recognition from active lexical production with clinical precision.
+> **Medición léxica cuantitativa y seguimiento de adquisición de vocabulario en inglés.**  
+> Distingue el reconocimiento pasivo de la producción léxica activa con precisión clínica.
 
-[![Node Version](https://img.shields.io/badge/node-22%2B%20(LTS)-brightgreen.svg)](https://nodejs.org/)
-[![Astro Version](https://img.shields.io/badge/astro-7.3-purple.svg)](https://astro.build/)
+**Español** | [Read in English](README.en.md)
+
+[![Versión de Node](https://img.shields.io/badge/node-22%2B%20(LTS)-brightgreen.svg)](https://nodejs.org/)
+[![Versión de Astro](https://img.shields.io/badge/astro-7.3-purple.svg)](https://astro.build/)
 [![TypeScript](https://img.shields.io/badge/typescript-5.9-blue.svg)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/tailwind-v4-38bdf8.svg)](https://tailwindcss.com/)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Licencia](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 ---
 
-## Overview & Philosophy
+## Visión General y Filosofía
 
-In Second Language Acquisition (SLA), there is a fundamental divide between two lexical categories:
+En la Adquisición de Segundas Lenguas (SLA), existe una división fundamental entre dos categorías léxicas:
 
-- **Passive Vocabulary**: Words you recognize when reading or listening, but do not spontaneously produce.
-- **Active Vocabulary**: Words you have internalized and can actively retrieve during spontaneous speech or writing.
+- **Vocabulario Pasivo**: Palabras que se reconocen al leer o escuchar, pero que no se producen de manera espontánea.
+- **Vocabulario Activo**: Palabras internalizadas que se pueden recuperar y utilizar espontáneamente al hablar o escribir.
 
-Most language platforms (Anki, Duolingo, LingQ) focus primarily on passive recognition through flashcards or reading comprehension. **WordCounter** addresses the missing half of the equation: measuring **linguistic production**.
+La mayoría de las plataformas de idiomas (Anki, Duolingo, LingQ) se centran casi exclusivamente en el reconocimiento pasivo mediante tarjetas de memoria o lectura asistida. **WordCounter** aborda la otra mitad de la ecuación: medir la **producción lingüística real en inglés**.
 
-WordCounter treats your vocabulary as an auditable, quantifiable system:
-- **Active Lexical Accounting**: Submit original compositions, essays, or journal entries to extract unique lemmas, track cumulative usage volume, and monitor temporal boundaries (`first_used_at` and `last_used_at`).
-- **Passive Inventory**: Maintain a catalog of words you recognize (via manual entry or CSV imports from Anki/LingQ).
-- **Linguistic Ratio**: Instantly see your active-to-passive conversion ratio, showing how effectively passive knowledge transforms into active expression.
-- **Local-First & Private**: Powered by an embedded SQLite database running with Write-Ahead Logging (WAL). Zero third-party analytics, zero cloud dependencies, and zero subscription lock-in.
-
----
-
-## Tech Stack
-
-- **Framework**: [Astro 7](https://astro.build/) (Server-Side Rendering with `@astrojs/node` standalone adapter)
-- **Interactive Islands**: [React 19](https://react.dev/) + [Lucide Icons](https://lucide.dev/)
-- **Database & ORM**: [better-sqlite3](https://github.com/WiseLibs/better-sqlite3) + [Drizzle ORM](https://orm.drizzle.team/)
-- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/) (Zero-runtime Vite plugin)
-- **Testing**: [Vitest](https://vitest.dev/) (Unit, API integration, and schema constraint tests)
-- **Containerization**: [Docker](https://www.docker.com/) & Docker Compose (Development & Production environments)
+WordCounter modela el vocabulario como un sistema cuantificable y auditable:
+- **Contabilidad Léxica Activa**: Permite ingresar composiciones originales, ensayos o notas en inglés para extraer lemas únicos, contabilizar la frecuencia de uso y registrar límites temporales (`first_used_at` y `last_used_at`).
+- **Validación Morfológica Offline**: Utiliza diccionarios Hunspell en memoria para filtrar erratas y palabras inexistentes antes de la ingestión, sin realizar llamadas a APIs externas.
+- **Inventario Pasivo**: Mantiene un catálogo de palabras reconocidas (mediante entrada manual o importación de archivos CSV desde Anki o LingQ).
+- **Ratio Lingüístico**: Visualiza de inmediato la tasa de conversión activo/pasivo, mostrando cómo el conocimiento pasivo se transforma en expresión activa.
+- **Local-First y Privado**: Funciona con una base de datos SQLite embebida en modo Write-Ahead Logging (WAL). Sin analíticas de terceros, sin dependencias en la nube y sin bloqueos de suscripción. El texto original analizado se descarta inmediatamente tras procesarlo.
 
 ---
 
-## Getting Started (Native / Local)
+## Stack Tecnológico
 
-### Prerequisites
+- **Framework**: [Astro 7](https://astro.build/) (Server-Side Rendering con adaptador `@astrojs/node` standalone)
+- **Islas Interactivas**: [React 19](https://react.dev/) + [Lucide Icons](https://lucide.dev/)
+- **Base de Datos y ORM**: [better-sqlite3](https://github.com/WiseLibs/better-sqlite3) + [Drizzle ORM](https://orm.drizzle.team/)
+- **Validación Léxica**: [nspell](https://github.com/wooorm/nspell) + [dictionary-en](https://github.com/wooorm/dictionaries) (Motor morfológico Hunspell offline)
+- **Estilos**: [Tailwind CSS v4](https://tailwindcss.com/) (Plugin de Vite con zero-runtime)
+- **Testing**: [Vitest](https://vitest.dev/) (Pruebas unitarias, de integración de API y de restricciones de esquema)
+- **Contenedores**: [Docker](https://www.docker.com/) y Docker Compose (Entornos de desarrollo y producción)
 
-- **Node.js**: `v22.0.0` or higher (Active LTS recommended for native SQLite stability)
-- **pnpm**: `v11.0.0` or higher
-- C++ build tools (required by `better-sqlite3` native bindings):
+---
+
+## Comenzando (Instalación Local)
+
+### Prerrequisitos
+
+- **Node.js**: `v22.0.0` o superior (se recomienda versión Active LTS por estabilidad en bindings nativos de SQLite)
+- **pnpm**: `v11.0.0` o superior
+- Herramientas de compilación C++ (requeridas por los bindings nativos de `better-sqlite3`):
   - Linux: `python3`, `make`, `g++` (`build-essential`)
   - macOS: Xcode Command Line Tools (`xcode-select --install`)
-  - Windows: Visual Studio Build Tools or Windows Subsystem for Linux (WSL2)
+  - Windows: Visual Studio Build Tools o WSL2 (Windows Subsystem for Linux)
 
-### 1. Installation
+### 1. Instalación
 
-Clone the repository and install dependencies:
+Clonar el repositorio e instalar las dependencias:
 
 ```bash
 git clone https://github.com/JahdielArciniegas/WordCounter.git
@@ -60,33 +64,33 @@ cd wordcounter
 pnpm install
 ```
 
-### 2. Development Server
+### 2. Servidor de Desarrollo
 
-Start the local development server with hot-module reloading:
+Iniciar el servidor local con recarga en caliente (HMR):
 
 ```bash
 pnpm dev
 ```
 
-Open your browser at `http://localhost:4321`.
+Abrir el navegador en `http://localhost:4321`.
 
-### 3. Running Tests
+### 3. Ejecución de Pruebas
 
-Execute the full Vitest suite:
+Ejecutar la suite completa con Vitest:
 
 ```bash
 pnpm test
 ```
 
-Or run tests in watch mode:
+O en modo interactivo/watch:
 
 ```bash
 pnpm test:watch
 ```
 
-### 4. Production Build
+### 4. Compilación para Producción
 
-Build the standalone server bundle and run it locally:
+Compilar el bundle standalone para producción y ejecutarlo localmente:
 
 ```bash
 pnpm build
@@ -95,51 +99,51 @@ pnpm start
 
 ---
 
-## Docker Workflows
+## Flujos con Docker
 
-WordCounter includes pre-configured Docker configurations for both zero-friction development and production deployment.
+WordCounter incluye configuraciones de Docker optimizadas tanto para desarrollo ágil como para despliegue en producción.
 
-### Development with Live Reload (`docker-compose.dev.yml`)
+### Desarrollo con Recarga en Vivo (`docker-compose.dev.yml`)
 
-Run WordCounter in an isolated container with host source code mounting and hot reload:
+Ejecuta la aplicación en un contenedor aislado con montaje del código fuente y recarga automática:
 
 ```bash
 docker compose -f docker-compose.dev.yml up
 ```
 
-- **Features**:
-  - Source code changes reflect immediately without rebuilding the image.
-  - Container-isolated `node_modules` prevents host-OS binary compatibility conflicts.
-  - Development database persists in a dedicated named volume (`wordcounter-dev-data`).
-  - Accessible at `http://localhost:4321`.
+- **Características**:
+  - Los cambios en el código se reflejan de inmediato sin necesidad de reconstruir la imagen.
+  - La carpeta `node_modules` queda aislada en el contenedor, evitando conflictos de arquitectura o binarios con el sistema host.
+  - La base de datos de desarrollo persiste en un volumen dedicado (`wordcounter-dev-data`).
+  - Accesible en `http://localhost:4321`.
 
-To stop the development container:
+Para detener el contenedor de desarrollo:
 
 ```bash
 docker compose -f docker-compose.dev.yml down
 ```
 
-### Production Deployment (`docker-compose.yml`)
+### Despliegue en Producción (`docker-compose.yml`)
 
-Deploy the multi-stage, optimized production image:
+Compila y despliega la imagen de producción en etapas múltiples (multi-stage build):
 
 ```bash
 docker compose up -d --build
 ```
 
-- **Features**:
-  - Multi-stage build isolates build toolchains (`python3`, `make`, `g++`) from the final runtime image.
-  - Automatic `pnpm prune --prod` keeps the runtime footprint minimal.
-  - Standalone Node SSR server with internal port `4321` mapped to host `4321`.
-  - SQLite database persists in a named volume (`wordcounter-data`) mounted at `/data/wordcounter.db`.
+- **Características**:
+  - El build multi-stage aísla la cadena de herramientas de compilación (`python3`, `make`, `g++`) de la imagen final de ejecución.
+  - Ejecución de `pnpm prune --prod` para minimizar el tamaño final del contenedor.
+  - Servidor Node SSR standalone con mapeo al puerto `4321`.
+  - La base de datos SQLite persiste en un volumen nombrado (`wordcounter-data`) montado en `/data/wordcounter.db`.
 
-To inspect running container logs:
+Para ver los logs del servicio en producción:
 
 ```bash
 docker compose logs -f
 ```
 
-To stop the production service:
+Para detener el contenedor de producción:
 
 ```bash
 docker compose down
@@ -147,82 +151,83 @@ docker compose down
 
 ---
 
-## Key Features & Usage
+## Funcionalidades Principales y Uso
 
-### 1. Text Ingestion & Active Tokenizer
-- Navigate to the **Dashboard** or **Active Vocabulary** section (`/active`).
-- Paste text from your journal, essay, or conversation practice.
-- **Date-Aware Ingestion**: Select any historical date to backdate texts. The system accurately sets or expands temporal boundaries (`first_used_at` as the earliest date seen, `last_used_at` as the latest date seen).
-- The engine tokenizes, strips punctuation, and atomically upserts occurrences into SQLite.
+### 1. Ingestión de Texto y Tokenizador Activo
+- Acceder al **Dashboard** o a la sección de **Vocabulario Activo** (`/active`).
+- Pegar el texto redactado en inglés (ensayo, diario personal, práctica libre).
+- **Ingestión con Fechas Históricas**: Permite seleccionar una fecha pasada para registrar textos anteriores. El sistema ajusta o expande con precisión los rangos temporales (`first_used_at` como la fecha más antigua observada y `last_used_at` como la más reciente).
+- El motor tokeniza el texto, valida la morfología en inglés con Hunspell y actualiza atómicamente las frecuencias en SQLite.
 
-### 2. Passive Vocabulary Catalog
-- Navigate to **Passive Vocabulary** (`/passive`).
-- Add single words or paste a list of words separated by commas or line breaks.
-- Upload standard CSV files exported from Anki or language apps.
-- All imports use idempotent `INSERT OR IGNORE` operations to avoid duplicate entries.
+### 2. Catálogo de Vocabulario Pasivo
+- Acceder a **Vocabulario Pasivo** (`/passive`).
+- Añadir palabras individuales o una lista de términos separados por comas o saltos de línea.
+- Cargar archivos CSV exportados desde Anki o plataformas de idiomas.
+- Todas las importaciones se ejecutan de manera idempotente (`INSERT OR IGNORE`) para evitar duplicados.
 
-### 3. Analytical Dashboard
-- View total unique active words vs. passive words.
-- Monitor your **Active/Passive Lexical Ratio**.
-- Sort active words by:
-  - **Frecuencia**: Most frequently produced words.
-  - **Reciente**: Most recently used words (`last_used_at`).
-  - **1° uso**: Earliest historical first encounter (`first_used_at`).
-  - **Alfabético**: Alphabetical index.
+### 3. Panel Analítico y Métricas
+- Visualizar el total de palabras activas únicas frente a las pasivas.
+- Monitorear el **Ratio Léxico Activo / Pasivo**.
+- Ordenar el vocabulario activo por:
+  - **Frecuencia**: Palabras más producidas.
+  - **Reciente**: Palabras utilizadas más recientemente (`last_used_at`).
+  - **1° uso**: Palabras incorporadas más antiguamente (`first_used_at`).
+  - **Alfabético**: Índice alfabético.
 
 ---
 
-## Project Structure
+## Estructura del Proyecto
 
 ```text
 wordcounter/
 ├── src/
-│   ├── components/         # Interactive React 19 islands
+│   ├── components/         # Islas interactivas en React 19
 │   │   ├── ActiveWordsManager.tsx
 │   │   └── PassiveWordsManager.tsx
-│   ├── db/                 # Drizzle ORM & SQLite setup
-│   │   ├── index.ts        # Database connection & automated schema init
-│   │   └── schema.ts       # Table schemas (active_words, passive_words)
-│   ├── layouts/            # Astro layout shells
+│   ├── db/                 # Conexión SQLite y esquema con Drizzle ORM
+│   │   ├── index.ts        # Conexión e inicialización automática de tablas
+│   │   └── schema.ts       # Esquema de tablas (active_words, passive_words)
+│   ├── layouts/            # Plantillas y layouts en Astro
 │   │   └── Layout.astro
-│   ├── pages/              # Astro SSR routes & REST API endpoints
+│   ├── pages/              # Rutas SSR y endpoints REST de la API
 │   │   ├── api/
 │   │   │   ├── active/     # /api/active/words, /api/active/analyze-text
 │   │   │   └── passive/    # /api/passive/words, /api/passive/import
-│   │   ├── active.astro    # Active vocabulary view
-│   │   ├── index.astro     # Main dashboard & ratio analytics
-│   │   └── passive.astro   # Passive vocabulary catalog
-│   ├── services/           # Domain business logic
-│   │   ├── active-vocab.service.ts
-│   │   ├── passive-vocab.service.ts
-│   │   └── tokenizer.service.ts
-│   └── styles/             # Global styles and Tailwind CSS v4 setup
-├── tests/                  # Automated Vitest test suite
-│   ├── api.test.ts         # REST API contract and endpoint tests
-│   ├── db.test.ts          # Database schema and constraint tests
-│   ├── services.test.ts    # Tokenizer & domain service unit tests
-│   └── smoke.test.ts       # Page routing smoke tests
-├── docker-compose.yml      # Production container orchestration
-├── docker-compose.dev.yml  # Development orchestration with live reload
-├── Dockerfile              # Multi-stage production container build
-├── Dockerfile.dev          # Development container build
-├── astro.config.mjs        # Astro configuration with Node SSR adapter
-└── package.json            # Project dependencies and scripts
+│   │   ├── active.astro    # Vista de vocabulario activo
+│   │   ├── index.astro     # Dashboard principal y métricas de ratio
+│   │   └── passive.astro   # Vista de vocabulario pasivo
+│   ├── services/           # Lógica de dominio del negocio
+│   │   ├── active.service.ts
+│   │   ├── passive.service.ts
+│   │   ├── tokenizer.ts
+│   │   └── lexical-validator.service.ts
+│   └── styles/             # Estilos globales y configuración de Tailwind CSS v4
+├── tests/                  # Suite de pruebas automatizadas con Vitest
+│   ├── api.test.ts         # Pruebas de contrato e integración de la API REST
+│   ├── db.test.ts          # Pruebas de esquema y restricciones de base de datos
+│   ├── services.test.ts    # Pruebas unitarias de servicios de dominio y tokenizador
+│   └── smoke.test.ts       # Pruebas de humo de enrutamiento
+├── docker-compose.yml      # Orquestación de producción
+├── docker-compose.dev.yml  # Orquestación de desarrollo con recarga en vivo
+├── Dockerfile              # Construcción multi-stage de producción
+├── Dockerfile.dev          # Construcción del contenedor de desarrollo
+├── astro.config.mjs        # Configuración de Astro con adaptador Node SSR
+└── package.json            # Dependencias y scripts del proyecto
 ```
 
 ---
 
-## Environment Variables
+## Variables de Entorno
 
-| Variable | Default | Description |
+| Variable | Por Defecto | Descripción |
 | :--- | :--- | :--- |
-| `NODE_ENV` | `development` | Runtime environment (`development` or `production`). |
-| `HOST` | `0.0.0.0` | Network interface to bind server. |
-| `PORT` | `4321` | HTTP port for Astro application. |
-| `DB_PATH` | `wordcounter.db` | Path to the SQLite database file (e.g. `/data/wordcounter.db`). |
+| `NODE_ENV` | `development` | Entorno de ejecución (`development` o `production`). |
+| `HOST` | `0.0.0.0` | Interfaz de red en la que escucha el servidor. |
+| `PORT` | `4321` | Puerto HTTP para la aplicación Astro. |
+| `DB_PATH` | `wordcounter.db` | Ruta al archivo de base de datos SQLite (ej. `/data/wordcounter.db`). |
 
 ---
 
-## License
+## Licencia
 
-This project is licensed under the MIT License.
+Este proyecto está bajo la Licencia MIT.
