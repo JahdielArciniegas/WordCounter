@@ -3,7 +3,7 @@
 > **Quantitative lexical measurement and vocabulary acquisition tracker.**  
 > Distinguish passive recognition from active lexical production with clinical precision.
 
-[![Node Version](https://img.shields.io/badge/node-24%2B-brightgreen.svg)](https://nodejs.org/)
+[![Node Version](https://img.shields.io/badge/node-22%2B%20(LTS)-brightgreen.svg)](https://nodejs.org/)
 [![Astro Version](https://img.shields.io/badge/astro-7.3-purple.svg)](https://astro.build/)
 [![TypeScript](https://img.shields.io/badge/typescript-5.9-blue.svg)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/tailwind-v4-38bdf8.svg)](https://tailwindcss.com/)
@@ -43,7 +43,7 @@ WordCounter treats your vocabulary as an auditable, quantifiable system:
 
 ### Prerequisites
 
-- **Node.js**: `v24.0.0` or higher
+- **Node.js**: `v22.0.0` or higher (Active LTS recommended for native SQLite stability)
 - **pnpm**: `v11.0.0` or higher
 - C++ build tools (required by `better-sqlite3` native bindings):
   - Linux: `python3`, `make`, `g++` (`build-essential`)
