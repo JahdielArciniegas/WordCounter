@@ -1,0 +1,736 @@
+<!doctype html>
+<html lang="en" data-resolution="landscape">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>WordCounter — Product Promo</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #09090b;
+        color: #f4f4f5;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;
+      }
+      #root {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background-color: #09090b;
+        background-image: 
+          radial-gradient(circle at 80% 20%, rgba(16, 185, 129, 0.08) 0%, transparent 45%),
+          radial-gradient(circle at 20% 80%, rgba(245, 158, 11, 0.06) 0%, transparent 45%),
+          linear-gradient(rgba(39, 39, 42, 0.3) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(39, 39, 42, 0.3) 1px, transparent 1px);
+        background-size: 100% 100%, 100% 100%, 80px 80px, 80px 80px;
+      }
+
+      /* Fixed Top Header */
+      .header-bar {
+        position: absolute;
+        top: 48px;
+        left: 80px;
+        right: 80px;
+        height: 56px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid rgba(63, 63, 70, 0.5);
+        padding-bottom: 24px;
+        z-index: 50;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .brand-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        background: #18181b;
+        border: 1px solid rgba(16, 185, 129, 0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: ui-monospace, monospace;
+        font-weight: 700;
+        font-size: 18px;
+        color: #34d399;
+        box-shadow: 0 0 15px rgba(16, 185, 129, 0.15);
+      }
+      .brand-title {
+        font-size: 20px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        color: #f4f4f5;
+      }
+      .brand-tag {
+        font-family: ui-monospace, monospace;
+        font-size: 12px;
+        color: #a1a1aa;
+        background: #18181b;
+        padding: 4px 10px;
+        border-radius: 6px;
+        border: 1px solid #3f3f46;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+      }
+      .system-status {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-family: ui-monospace, monospace;
+        font-size: 13px;
+        color: #d4d4d8;
+      }
+      .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #10b981;
+        box-shadow: 0 0 10px #10b981;
+      }
+
+      /* Clips & Layout */
+      .clip {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .scene-wrapper {
+        width: 1760px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+
+      /* Scene 1: Intro */
+      .intro-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 16px;
+        background: rgba(16, 185, 129, 0.12);
+        border: 1px solid rgba(16, 185, 129, 0.4);
+        border-radius: 9999px;
+        font-family: ui-monospace, monospace;
+        font-size: 14px;
+        color: #34d399;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        margin-bottom: 28px;
+      }
+      .intro-headline {
+        font-size: 84px;
+        font-weight: 800;
+        letter-spacing: -0.04em;
+        line-height: 1.05;
+        text-align: center;
+        color: #f4f4f5;
+        max-width: 1400px;
+      }
+      .intro-highlight {
+        background: linear-gradient(135deg, #10b981 0%, #6ee7b7 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      .intro-sub {
+        font-size: 26px;
+        color: #d4d4d8;
+        text-align: center;
+        max-width: 980px;
+        margin-top: 24px;
+        font-weight: 400;
+        line-height: 1.4;
+      }
+
+      /* Scene 2: Metrics */
+      .metrics-eyebrow {
+        font-family: ui-monospace, monospace;
+        font-size: 14px;
+        color: #a1a1aa;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 32px;
+      }
+      .cards-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 28px;
+        width: 100%;
+        max-width: 1560px;
+      }
+      .metric-card {
+        background: #111115;
+        border: 1px solid #27272a;
+        border-radius: 16px;
+        padding: 40px 36px;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        overflow: hidden;
+      }
+      .metric-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: #27272a;
+      }
+      .card-active::before {
+        background: linear-gradient(90deg, #10b981, #059669);
+      }
+      .card-passive::before {
+        background: linear-gradient(90deg, #f59e0b, #d97706);
+      }
+      .card-ratio::before {
+        background: linear-gradient(90deg, #38bdf8, #0284c7);
+      }
+      .card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 28px;
+      }
+      .card-badge {
+        font-family: ui-monospace, monospace;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 5px 12px;
+        border-radius: 6px;
+      }
+      .badge-active {
+        background: rgba(16, 185, 129, 0.15);
+        color: #34d399;
+        border: 1px solid rgba(16, 185, 129, 0.4);
+      }
+      .badge-passive {
+        background: rgba(245, 158, 11, 0.15);
+        color: #fbbf24;
+        border: 1px solid rgba(245, 158, 11, 0.4);
+      }
+      .badge-ratio {
+        background: rgba(56, 189, 248, 0.15);
+        color: #38bdf8;
+        border: 1px solid rgba(56, 189, 248, 0.4);
+      }
+      .card-label {
+        font-size: 15px;
+        color: #a1a1aa;
+        font-weight: 500;
+      }
+      .card-value {
+        font-family: ui-monospace, monospace;
+        font-size: 76px;
+        font-weight: 700;
+        letter-spacing: -0.03em;
+        line-height: 1;
+        margin-bottom: 16px;
+        font-variant-numeric: tabular-nums;
+      }
+      .value-active {
+        color: #34d399;
+      }
+      .value-passive {
+        color: #fbbf24;
+      }
+      .value-ratio {
+        color: #f4f4f5;
+      }
+      .card-subtext {
+        font-size: 16px;
+        color: #d4d4d8;
+        margin-bottom: 24px;
+      }
+      .card-footer {
+        margin-top: auto;
+        padding-top: 16px;
+        border-top: 1px solid #1c1c22;
+        font-family: ui-monospace, monospace;
+        font-size: 13px;
+        color: #a1a1aa;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      /* Scene 3: Chart */
+      .chart-container {
+        width: 100%;
+        max-width: 1480px;
+        background: #111115;
+        border: 1px solid #27272a;
+        border-radius: 16px;
+        padding: 44px 48px;
+        display: grid;
+        grid-template-columns: 2.1fr 1fr;
+        gap: 48px;
+        align-items: center;
+      }
+      .chart-header {
+        margin-bottom: 32px;
+      }
+      .chart-title {
+        font-size: 26px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        color: #f4f4f5;
+        margin-bottom: 6px;
+      }
+      .chart-desc {
+        font-size: 15px;
+        color: #a1a1aa;
+      }
+      .bars-wrapper {
+        height: 240px;
+        display: flex;
+        align-items: flex-end;
+        gap: 16px;
+        padding-bottom: 32px;
+        border-bottom: 1px solid #27272a;
+        position: relative;
+      }
+      .bar-column {
+        flex: 1;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 10px;
+      }
+      .bar-track {
+        width: 100%;
+        height: 100%;
+        background: rgba(39, 39, 42, 0.4);
+        border-radius: 6px;
+        display: flex;
+        align-items: flex-end;
+        overflow: hidden;
+      }
+      .bar-fill {
+        width: 100%;
+        background: linear-gradient(180deg, #34d399 0%, #059669 100%);
+        border-radius: 6px;
+        box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
+        transform-origin: bottom;
+      }
+      .bar-label {
+        font-family: ui-monospace, monospace;
+        font-size: 12px;
+        color: #a1a1aa;
+      }
+      .chart-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+      .stat-badge-box {
+        background: #18181b;
+        border: 1px solid #27272a;
+        border-radius: 12px;
+        padding: 22px;
+      }
+      .stat-badge-box h4 {
+        font-family: ui-monospace, monospace;
+        font-size: 12px;
+        color: #a1a1aa;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 8px;
+      }
+      .stat-badge-box .big-stat {
+        font-family: ui-monospace, monospace;
+        font-size: 36px;
+        font-weight: 700;
+        color: #34d399;
+      }
+      .stat-badge-box p {
+        font-size: 14px;
+        color: #d4d4d8;
+        margin-top: 4px;
+      }
+
+      /* Scene 4: Outro */
+      .outro-box {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+      .outro-icon {
+        width: 84px;
+        height: 84px;
+        border-radius: 20px;
+        background: #18181b;
+        border: 2px solid rgba(16, 185, 129, 0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: ui-monospace, monospace;
+        font-weight: 800;
+        font-size: 42px;
+        color: #34d399;
+        box-shadow: 0 0 40px rgba(16, 185, 129, 0.25);
+        margin-bottom: 28px;
+      }
+      .outro-title {
+        font-size: 76px;
+        font-weight: 800;
+        letter-spacing: -0.04em;
+        color: #f4f4f5;
+        margin-bottom: 16px;
+      }
+      .outro-tagline {
+        font-size: 28px;
+        color: #d4d4d8;
+        margin-bottom: 36px;
+        font-weight: 400;
+      }
+      .pill-row {
+        display: flex;
+        gap: 14px;
+      }
+      .feature-pill {
+        background: rgba(39, 39, 42, 0.5);
+        border: 1px solid #3f3f46;
+        padding: 8px 18px;
+        border-radius: 9999px;
+        font-family: ui-monospace, monospace;
+        font-size: 14px;
+        color: #e4e4e7;
+      }
+
+      /* Captions Bar */
+      .caption-rail {
+        position: absolute;
+        bottom: 48px;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: center;
+        z-index: 50;
+      }
+      .caption-text {
+        background: rgba(9, 9, 11, 0.88);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(82, 82, 91, 0.5);
+        padding: 10px 24px;
+        border-radius: 9999px;
+        font-size: 18px;
+        font-weight: 500;
+        color: #f4f4f5;
+        letter-spacing: -0.01em;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="10"
+      data-fps="24"
+      data-width="1920"
+      data-height="1080"
+    >
+      <!-- Top Persistent HUD -->
+      <div class="header-bar">
+        <div class="brand">
+          <div class="brand-icon">W</div>
+          <span class="brand-title">WordCounter</span>
+          <span class="brand-tag">Lexical Accounting</span>
+        </div>
+        <div class="system-status">
+          <span class="status-dot"></span>
+          <span>OFFLINE HUNSPELL · LOCAL-FIRST SQLITE</span>
+        </div>
+      </div>
+
+      <!-- Scene 1: Minimal Title Reveal (0-2s) -->
+      <section id="scene-intro" class="clip" data-start="0" data-duration="2" data-track-index="1">
+        <div id="intro-content" class="scene-wrapper">
+          <div id="intro-pill" class="intro-pill">Second Language Acquisition</div>
+          <h1 id="intro-headline" class="intro-headline">
+            Stop guessing your vocabulary.<br />
+            <span class="intro-highlight">Measure what you actually write.</span>
+          </h1>
+          <p id="intro-sub" class="intro-sub">
+            Quantitative lexical production tracking for Spanish speakers mastering English.
+          </p>
+        </div>
+      </section>
+
+      <!-- Scene 2: Three Metric Cards (2-6s) -->
+      <section id="scene-metrics" class="clip" data-start="2" data-duration="4" data-track-index="2">
+        <div id="metrics-content" class="scene-wrapper">
+          <div id="metrics-eyebrow" class="metrics-eyebrow">Auditable Production Footprint</div>
+          <div class="cards-grid">
+            <!-- Active Card -->
+            <div id="card-1" class="metric-card card-active">
+              <div class="card-header">
+                <span class="card-badge badge-active">Active Vocab</span>
+                <span class="card-label">Production</span>
+              </div>
+              <div class="card-value value-active">1,420</div>
+              <div class="card-subtext">Words actively produced in essays & notes</div>
+              <div class="card-footer">
+                <span>↑ +342 newly acquired</span>
+              </div>
+            </div>
+
+            <!-- Passive Card -->
+            <div id="card-2" class="metric-card card-passive">
+              <div class="card-header">
+                <span class="card-badge badge-passive">Passive Vocab</span>
+                <span class="card-label">Recognition</span>
+              </div>
+              <div class="card-value value-passive">8,650</div>
+              <div class="card-subtext">Words recognized in reading & listening</div>
+              <div class="card-footer">
+                <span>Anki & LingQ CSV imports</span>
+              </div>
+            </div>
+
+            <!-- Ratio Card -->
+            <div id="card-3" class="metric-card card-ratio">
+              <div class="card-header">
+                <span class="card-badge badge-ratio">Conversion</span>
+                <span class="card-label">Efficiency</span>
+              </div>
+              <div class="card-value value-ratio">16.4%</div>
+              <div class="card-subtext">Active-to-passive conversion ratio</div>
+              <div class="card-footer">
+                <span>B2 → C1 Fluency milestone</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Scene 3: Frequency / Production Chart (6-9s) -->
+      <section id="scene-chart" class="clip" data-start="6" data-duration="3" data-track-index="3">
+        <div id="chart-content" class="scene-wrapper">
+          <div class="chart-container">
+            <div>
+              <div class="chart-header">
+                <h3 class="chart-title">Lexical Accumulation Over Time</h3>
+                <p class="chart-desc">Cumulative lemma production frequency tracked per week</p>
+              </div>
+              <div class="bars-wrapper">
+                <div class="bar-column">
+                  <div class="bar-track"><div class="bar-fill" style="height: 25%;"></div></div>
+                  <span class="bar-label">W01</span>
+                </div>
+                <div class="bar-column">
+                  <div class="bar-track"><div class="bar-fill" style="height: 34%;"></div></div>
+                  <span class="bar-label">W02</span>
+                </div>
+                <div class="bar-column">
+                  <div class="bar-track"><div class="bar-fill" style="height: 42%;"></div></div>
+                  <span class="bar-label">W03</span>
+                </div>
+                <div class="bar-column">
+                  <div class="bar-track"><div class="bar-fill" style="height: 48%;"></div></div>
+                  <span class="bar-label">W04</span>
+                </div>
+                <div class="bar-column">
+                  <div class="bar-track"><div class="bar-fill" style="height: 58%;"></div></div>
+                  <span class="bar-label">W05</span>
+                </div>
+                <div class="bar-column">
+                  <div class="bar-track"><div class="bar-fill" style="height: 65%;"></div></div>
+                  <span class="bar-label">W06</span>
+                </div>
+                <div class="bar-column">
+                  <div class="bar-track"><div class="bar-fill" style="height: 72%;"></div></div>
+                  <span class="bar-label">W07</span>
+                </div>
+                <div class="bar-column">
+                  <div class="bar-track"><div class="bar-fill" style="height: 78%;"></div></div>
+                  <span class="bar-label">W08</span>
+                </div>
+                <div class="bar-column">
+                  <div class="bar-track"><div class="bar-fill" style="height: 85%;"></div></div>
+                  <span class="bar-label">W09</span>
+                </div>
+                <div class="bar-column">
+                  <div class="bar-track"><div class="bar-fill" style="height: 94%;"></div></div>
+                  <span class="bar-label">W10</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="chart-sidebar">
+              <div id="chart-stat-1" class="stat-badge-box">
+                <h4>Verified Lemmas</h4>
+                <div class="big-stat">14,890</div>
+                <p>Occurrences recorded across all texts</p>
+              </div>
+              <div id="chart-stat-2" class="stat-badge-box">
+                <h4>Morphological Filter</h4>
+                <div class="big-stat" style="color: #38bdf8;">100%</div>
+                <p>Typos discarded via Hunspell offline</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Scene 4: Final Logo & Tagline (9-10s) -->
+      <section id="scene-outro" class="clip" data-start="9" data-duration="1" data-track-index="4">
+        <div id="outro-content" class="scene-wrapper">
+          <div class="outro-box">
+            <div id="outro-icon" class="outro-icon">W</div>
+            <h2 id="outro-title" class="outro-title">WordCounter</h2>
+            <p id="outro-tagline" class="outro-tagline">
+              Own your English vocabulary. Clinical, private, local-first.
+            </p>
+            <div id="outro-pills" class="pill-row">
+              <span class="feature-pill">SQLite WAL</span>
+              <span class="feature-pill">Hunspell Engine</span>
+              <span class="feature-pill">Zero Cloud Lock-in</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Dynamic Captions Bar (Persistent HUD at bottom) -->
+      <div id="caption-rail" class="caption-rail" data-layout-allow-overlap>
+        <div id="caption-box" class="caption-text">
+          Stop guessing your vocabulary. Measure what you actually produce.
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const tl = gsap.timeline({ paused: true });
+
+      // Captions timeline updates
+      tl.set("#caption-box", { textContent: "Stop guessing your English vocabulary. Measure what you actually write." }, 0.0);
+      tl.set("#caption-box", { textContent: "Quantify active production versus passive recognition with clinical precision." }, 2.0);
+      tl.set("#caption-box", { textContent: "Track cumulative lexical growth over time. Offline Hunspell verification." }, 6.0);
+      tl.set("#caption-box", { textContent: "WordCounter — Local-first, private English lexical accounting." }, 9.0);
+
+      // --- Scene 1: Intro (0s - 2s) ---
+      tl.fromTo("#intro-pill", 
+        { opacity: 0, y: -16, scale: 0.9 }, 
+        { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "power2.out" }, 
+        0.1
+      );
+      tl.fromTo("#intro-headline", 
+        { opacity: 0, y: 32 }, 
+        { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 
+        0.25
+      );
+      tl.fromTo("#intro-sub", 
+        { opacity: 0, y: 20 }, 
+        { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 
+        0.5
+      );
+      tl.to("#intro-content", 
+        { opacity: 0, y: -20, duration: 0.25, ease: "power2.in" }, 
+        1.75
+      );
+
+      // --- Scene 2: Metrics Cards (2s - 6s) ---
+      tl.fromTo("#metrics-eyebrow",
+        { opacity: 0, y: 15 },
+        { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" },
+        2.05
+      );
+      tl.fromTo("#card-1", 
+        { opacity: 0, y: 40, scale: 0.96 }, 
+        { opacity: 1, y: 0, scale: 1, duration: 0.55, ease: "power3.out" }, 
+        2.15
+      );
+      tl.fromTo("#card-2", 
+        { opacity: 0, y: 40, scale: 0.96 }, 
+        { opacity: 1, y: 0, scale: 1, duration: 0.55, ease: "power3.out" }, 
+        2.3
+      );
+      tl.fromTo("#card-3", 
+        { opacity: 0, y: 40, scale: 0.96 }, 
+        { opacity: 1, y: 0, scale: 1, duration: 0.55, ease: "power3.out" }, 
+        2.45
+      );
+      tl.to("#metrics-content", 
+        { opacity: 0, y: -24, duration: 0.28, ease: "power2.in" }, 
+        5.72
+      );
+
+      // --- Scene 3: Chart & Accumulation (6s - 9s) ---
+      tl.fromTo("#chart-content", 
+        { opacity: 0, scale: 0.97 }, 
+        { opacity: 1, scale: 1, duration: 0.45, ease: "power2.out" }, 
+        6.05
+      );
+      tl.fromTo(".bar-fill", 
+        { scaleY: 0 }, 
+        { scaleY: 1, duration: 0.55, stagger: 0.04, ease: "power2.out" }, 
+        6.2
+      );
+      tl.fromTo("#chart-stat-1", 
+        { opacity: 0, x: 24 }, 
+        { opacity: 1, x: 0, duration: 0.45, ease: "power2.out" }, 
+        6.4
+      );
+      tl.fromTo("#chart-stat-2", 
+        { opacity: 0, x: 24 }, 
+        { opacity: 1, x: 0, duration: 0.45, ease: "power2.out" }, 
+        6.55
+      );
+      tl.to("#chart-content", 
+        { opacity: 0, y: -20, duration: 0.25, ease: "power2.in" }, 
+        8.75
+      );
+
+      // --- Scene 4: Outro (9s - 10s) ---
+      tl.fromTo("#outro-icon", 
+        { opacity: 0, scale: 0.7, rotation: -10 }, 
+        { opacity: 1, scale: 1, rotation: 0, duration: 0.4, ease: "back.out(1.7)" }, 
+        9.05
+      );
+      tl.fromTo("#outro-title", 
+        { opacity: 0, y: 20 }, 
+        { opacity: 1, y: 0, duration: 0.35, ease: "power2.out" }, 
+        9.15
+      );
+      tl.fromTo("#outro-tagline", 
+        { opacity: 0, y: 15 }, 
+        { opacity: 1, y: 0, duration: 0.3, ease: "power2.out" }, 
+        9.25
+      );
+      tl.fromTo("#outro-pills", 
+        { opacity: 0, y: 12 }, 
+        { opacity: 1, y: 0, duration: 0.3, ease: "power2.out" }, 
+        9.35
+      );
+
+      // Register the paused master timeline
+      window.__timelines = window.__timelines || {};
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>
