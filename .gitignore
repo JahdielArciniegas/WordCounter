@@ -21,3 +21,5 @@ npm-debug.log*
 pnpm-debug.log*
 *.log
 .DS_Store
+__pycache__/
+*.pyc
